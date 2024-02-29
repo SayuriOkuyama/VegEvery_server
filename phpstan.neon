@@ -1,0 +1,10 @@
+parameters:
+  level: 6
+  paths:
+    - app
+  excludePaths:
+    - vendor
+    - ./*/*/FileToBeExcluded.php
+    - node_modules
+    - storage
+    - migrations

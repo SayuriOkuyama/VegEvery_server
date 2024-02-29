@@ -1,0 +1,86 @@
+// https://aka.ms/devcontainer.json
+{
+  "name": "Existing Docker Compose (Extend)",
+  "dockerComposeFile": ["../docker-compose.yml"],
+  "service": "laravel.test",
+  "workspaceFolder": "/var/www/html",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // HTML,CSS のインテリセンス
+        "ecmel.vscode-html-css",
+        // prettier
+        "esbenp.prettier-vscode",
+        // Xdebug
+        "xdebug.php-debug",
+        // PHPコード補完やチェック
+        "bmewburn.vscode-intelephense-client",
+        // インデントレインボー
+        "oderwat.indent-rainbow",
+        // コードスペルチェック
+        "streetsidesoftware.code-spell-checker",
+        "IBM.output-colorizer",
+        // タグ補完
+        "formulahendry.auto-rename-tag",
+        // W3C バリデーター
+        "CelianRiboulet.webvalidator",
+        // ESLint
+        "dbaeumer.vscode-eslint",
+        // Laravel Blade スニペット
+        "onecentlin.laravel-blade",
+        // Laravel スニペット
+        "onecentlin.laravel5-snippets",
+        // Laravel artisan 便利機能
+        "ryannaddy.laravel-artisan",
+        // Laravel コード補完
+        "amiralizadeh9480.laravel-extra-intellisense",
+        // .envファイルの文法ハイライト
+        "mikestead.dotenv",
+        // Laravel Blade フォーマッター
+        "shufo.vscode-blade-formatter",
+        // Laravel Blade wrapper
+        "IHunte.laravel-blade-wrapper",
+        // Plant UML
+        "jebbs.plantuml",
+        // styled-component のハイライト
+        "styled-components.vscode-styled-components",
+        // React のスニペット
+        "dsznajder.es7-react-js-snippets"
+      ],
+      "settings": {
+        "workbench.iconTheme": "vscode-icons",
+        "editor.renderWhitespace": "all",
+        "editor.indentSize": "tabSize",
+        "editor.tabSize": 2,
+        "editor.formatOnSave": true,
+        "bladeFormatter.format.indentSize": 2,
+        "extensions.verifySignature": false,
+        "files.trimTrailingWhitespace": true,
+        "editor.insertSpaces": true,
+        "editor.wordSeparators": "`~!@#%^&*()-=+[{]}\\|;:'\",.<>/?",
+        "[json][jsonc][html][CSS][javascript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.tabSize": 2,
+          "editor.codeActionsOnSave": {
+            "source.fixAll": true
+          }
+        },
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        "[php]": {
+          "editor.tabSize": 2,
+          "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+        },
+        "[blade]": {
+          "editor.defaultFormatter": "shufo.vscode-blade-formatter"
+        }
+      }
+    }
+  },
+  "remoteUser": "sail",
+  "postCreateCommand": "chown -R 1000:1000 /var/www/html 2>/dev/null || true",
+  "forwardPorts": [9003]
+  // "runServices": [],
+  // "shutdownAction": "none",
+}
