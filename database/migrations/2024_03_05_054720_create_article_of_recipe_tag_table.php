@@ -11,14 +11,9 @@ return new class extends Migration
    */
   public function up(): void
   {
-    Schema::create('users', function (Blueprint $table) {
-      $table->id();
-      $table->string('name')->unique();
-      $table->string('password');
-      $table->string('secret_question');
-      $table->string('answer_to_secret_question');
-      $table->string('vegetarian_type');
-      $table->string('icon');
+    Schema::create('article_of_recipe_tag', function (Blueprint $table) {
+      $table->foreignId('article_of_recipe_id')->constrained('articles_of_recipe');
+      $table->foreignId('tag_id')->constrained('tags');
       $table->timestamps();
     });
   }
@@ -28,6 +23,6 @@ return new class extends Migration
    */
   public function down(): void
   {
-    Schema::dropIfExists('users');
+    Schema::dropIfExists('article_of_recipe_tag');
   }
 };
