@@ -11,9 +11,9 @@ return new class extends Migration
    */
   public function up(): void
   {
-    Schema::create('comments_to_item', function (Blueprint $table) {
+    Schema::create('comments_to_recipe', function (Blueprint $table) {
       $table->id();
-      $table->foreignId('article_of_item_id')->constrained('articles_of_item');
+      $table->foreignId('article_of_recipe_id')->constrained('articles_of_recipe');
       $table->foreignId('user_id')->constrained('users');
       $table->integer('number_of_likes');
       $table->string('text');
@@ -26,6 +26,6 @@ return new class extends Migration
    */
   public function down(): void
   {
-    Schema::dropIfExists('comments_to_item');
+    Schema::dropIfExists('comments_to_recipe');
   }
 };

@@ -9,6 +9,8 @@ class CommentToRecipe extends Model
 {
   use HasFactory;
 
+  protected $table = 'comments_to_recipe';
+
   protected $fillable = [
     'article_of_recipe_id',
     'user_id',

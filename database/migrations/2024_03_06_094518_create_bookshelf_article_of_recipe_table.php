@@ -11,12 +11,9 @@ return new class extends Migration
    */
   public function up(): void
   {
-    Schema::create('comments_to_recipe', function (Blueprint $table) {
-      $table->id();
+    Schema::create('bookshelf_article_of_recipe', function (Blueprint $table) {
+      $table->foreignId('bookshelf_id')->constrained('bookshelves');
       $table->foreignId('article_of_recipe_id')->constrained('articles_of_recipe');
-      $table->foreignId('user_id')->constrained('users');
-      $table->integer('number_of_likes');
-      $table->string('text');
       $table->timestamps();
     });
   }
@@ -26,6 +23,6 @@ return new class extends Migration
    */
   public function down(): void
   {
-    Schema::dropIfExists('comment_to_recipes');
+    Schema::dropIfExists('bookshelf_article_of_recipe');
   }
 };

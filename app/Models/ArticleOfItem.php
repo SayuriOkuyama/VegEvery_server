@@ -9,6 +9,8 @@ class ArticleOfItem extends Model
 {
   use HasFactory;
 
+  protected $table = 'articles_of_item';
+
   protected $fillable = [
     'title',
     'thumbnail',

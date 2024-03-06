@@ -5,19 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Favorite extends Model
+class ArticleOfRecipeTag extends Model
 {
   use HasFactory;
 
+  protected $table = 'article_of_recipe_tag';
+
   protected $fillable = [
     'article_of_recipe_id',
-    'user_id',
-    'number_of_likes',
-    'text',
+    'tag_id',
   ];
-
-  public function bookshelf()
-  {
-    return $this->belongsTo(Bookshelf::class);
-  }
 }
