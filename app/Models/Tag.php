@@ -23,7 +23,7 @@ class Tag extends Model
     return $this->belongsToMany(ArticleOfItem::class);
   }
 
-  public function review()
+  public function reviews()
   {
     return $this->belongsToMany(Review::class);
   }

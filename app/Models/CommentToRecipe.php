@@ -22,4 +22,9 @@ class CommentToRecipe extends Model
   {
     return $this->belongsTo(ArticleOfRecipe::class);
   }
+
+  public function users()
+  {
+    return $this->belongsTo(User::class);
+  }
 }

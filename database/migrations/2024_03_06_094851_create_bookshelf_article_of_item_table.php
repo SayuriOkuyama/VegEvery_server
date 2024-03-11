@@ -12,6 +12,7 @@ return new class extends Migration
   public function up(): void
   {
     Schema::create('bookshelf_article_of_item', function (Blueprint $table) {
+      $table->id();
       $table->foreignId('bookshelf_id')->constrained('bookshelves');
       $table->foreignId('article_of_item_id')->constrained('articles_of_item');
       $table->timestamps();

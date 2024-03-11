@@ -15,7 +15,7 @@ class Menu extends Model
     'price',
   ];
 
-  public function review()
+  public function reviews()
   {
     return $this->belongsTo(Review::class);
   }

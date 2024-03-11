@@ -22,4 +22,9 @@ class CommentToItem extends Model
   {
     return $this->belongsTo(ArticleOfItem::class);
   }
+
+  public function users()
+  {
+    return $this->belongsTo(User::class);
+  }
 }
