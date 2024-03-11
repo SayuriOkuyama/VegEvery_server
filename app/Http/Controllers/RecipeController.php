@@ -11,6 +11,7 @@ use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class RecipeController extends Controller
 {
@@ -54,7 +55,16 @@ class RecipeController extends Controller
    */
   public function store(Request $request)
   {
-    Log::debug($request);
+    $thumbnail = $request->thumbnail;
+    $stepImages = $request->stepImages;
+
+    Log::debug($thumbnail);
+    Log::debug($stepImages);
+
+    $thumbnail = $request->file("thumbnail");
+    $stepImage = $request->file("stepImages");
+    Log::debug($thumbnail);
+    Log::debug($stepImage);
 
     $article = ArticleOfRecipe::create([
       "user_id" => 1,
@@ -71,12 +81,8 @@ class RecipeController extends Controller
       "fruitarian" => $request['vege_type']['fruitarian'],
       "other_vegetarian" => $request['vege_type']['other_vegetarian'],
     ]);
-    Log::debug($article);
-    Log::debug($article);
 
     foreach ($request["steps"] as $order => $step) {
-      Log::debug($step);
-
       $stepData = RecipeStep::create([
         "article_of_recipe_id" => $article->id,
         "order" => $order + 1,
@@ -84,11 +90,8 @@ class RecipeController extends Controller
         "image" => $request->stepImages[$order][$order],
       ]);
     };
-    Log::debug($stepData);
 
     for ($i = 0; $i < count($request["materials"]); $i++) {
-      Log::debug(count($request["materials"]));
-
       $materials = Material::create([
         "article_of_recipe_id" => $article->id,
         "name" => $request["materials"][$i]["material"],
@@ -96,10 +99,8 @@ class RecipeController extends Controller
         "unit" => $request["materials"][$i]['unit'],
       ]);
     }
-    Log::debug($materials);
 
     $tags = $request['tags'];
-    Log::debug($tags);
 
     foreach ($tags as $tag) {
       if ($tag !== null) {
@@ -111,9 +112,24 @@ class RecipeController extends Controller
         ]);
       }
     }
-    Log::debug($article_tag);
 
-    return response()->json($request);
+    $supabaseUrl = env('SUPABASE_URL');
+    $apiKey = env('SUPABASE_APIKEY');
+    $bucketName = env('SUPABASE_BUCKET');
+
+
+    // $filepath = $thumbnail->getClientOriginalName();
+    // $response = Http::withHeaders([
+    //   'Authorization' => 'Bearer ' . $apiKey,
+    // ])
+    //   ->attach('file', $filepath)
+    //   ->post("{$supabaseUrl}/storage/v1/object/{$bucketName}/recipes/thumbnail", [
+    //     'file' => fopen('/path/to/file', 'r')
+    //   ]);
+
+    // $fileURL = $response->json()['url'];
+
+    // return response()->json($fileURL);
   }
 
   /**
