@@ -27,12 +27,12 @@ class Review extends Model
   ];
 
 
-  public function user()
+  public function users()
   {
     return $this->belongsTo(User::class);
   }
 
-  public function menu()
+  public function menus()
   {
     return $this->hasMany(Menu::class);
   }

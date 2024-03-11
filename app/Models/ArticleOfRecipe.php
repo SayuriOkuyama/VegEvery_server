@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Egulias\EmailValidator\Parser\Comment;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -35,23 +36,23 @@ class ArticleOfRecipe extends Model
     return $this->belongsTo(User::class);
   }
 
-  public function material()
+  public function materials()
   {
     return $this->hasMany(Material::class);
   }
 
   public function recipeSteps()
   {
-    return $this->hasMany(Material::class);
+    return $this->hasMany(RecipeStep::class);
   }
 
   public function commentsToRecipe()
   {
-    return $this->hasMany(Material::class);
+    return $this->hasMany(CommentToRecipe::class);
   }
 
   public function tags()
   {
-    return $this->belongsToMany(Material::class);
+    return $this->belongsToMany(Tag::class);
   }
 }

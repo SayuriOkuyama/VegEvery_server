@@ -14,13 +14,8 @@ class Bookshelf extends Model
     'name',
   ];
 
-  public function user()
+  public function users()
   {
     return $this->belongsTo(User::class);
-  }
-
-  public function favorite()
-  {
-    return $this->hasMany(Favorite::class);
   }
 }

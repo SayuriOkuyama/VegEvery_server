@@ -16,8 +16,8 @@ class Material extends Model
     'unit',
   ];
 
-  public function articlesOfRecipe()
-  {
-    return $this->belongsTo(ArticleOfRecipe::class);
-  }
+  // public function articleOfRecipe()
+  // {
+  //   return $this->belongsTo(ArticleOfRecipe::class);
+  // }
 }

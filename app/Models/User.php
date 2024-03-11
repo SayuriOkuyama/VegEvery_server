@@ -44,4 +44,14 @@ class User extends Authenticatable
   protected $casts = [
     'password' => 'hashed',
   ];
+
+  public function articlesOfRecipe()
+  {
+    return $this->hasMany(ArticleOfRecipe::class);
+  }
+
+  public function articlesOfItem()
+  {
+    return $this->hasMany(ArticleOfItem::class);
+  }
 }

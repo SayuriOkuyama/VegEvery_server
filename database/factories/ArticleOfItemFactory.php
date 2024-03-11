@@ -21,14 +21,14 @@ class ArticleOfItemFactory extends Factory
       'title' => fake()->realText($maxNbChars = 20),
       'thumbnail' => fake()->imageUrl($width = 300, $height = 300),
       'number_of_likes' => fake()->numberBetween($min = 0, $max = 500),
-      'vegan' => fake()->randomElement([1, 2]),
-      'oriental_vegetarian' => fake()->randomElement([1, 2]),
-      'ovo_vegetarian' => fake()->randomElement([1, 2]),
-      'pescatarian' => fake()->randomElement([1, 2]),
-      'lacto_vegetarian' => fake()->randomElement([1, 2]),
-      'pollo_vegetarian' => fake()->randomElement([1, 2]),
-      'fruitarian' => fake()->randomElement([1, 2]),
-      'other_vegetarian' => fake()->randomElement([1, 2]),
+      'vegan' => fake()->randomElement([true, false]),
+      'oriental_vegetarian' => fake()->randomElement([true, false]),
+      'ovo_vegetarian' => fake()->randomElement([true, false]),
+      'pescatarian' => fake()->randomElement([true, false]),
+      'lacto_vegetarian' => fake()->randomElement([true, false]),
+      'pollo_vegetarian' => fake()->randomElement([true, false]),
+      'fruitarian' => fake()->randomElement([true, false]),
+      'other_vegetarian' => fake()->randomElement([true, false]),
       'user_id' => User::factory()
     ];
   }

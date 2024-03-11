@@ -12,6 +12,7 @@ return new class extends Migration
   public function up(): void
   {
     Schema::create('favorites', function (Blueprint $table) {
+      $table->id();
       $table->foreignId('bookshelf_id')->constrained('bookshelves');
       $table->string('article_type');
       $table->bigInteger('article_id');

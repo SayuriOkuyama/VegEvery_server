@@ -31,17 +31,17 @@ class ArticleOfItem extends Model
     return $this->belongsTo(User::class);
   }
 
-  public function item()
+  public function items()
   {
     return $this->hasMany(Item::class);
   }
 
-  public function report()
+  public function reports()
   {
     return $this->hasMany(Report::class);
   }
 
-  public function commentToItem()
+  public function commentsToItem()
   {
     return $this->hasMany(CommentToItem::class);
   }

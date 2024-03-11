@@ -11,7 +11,9 @@ return new class extends Migration
    */
   public function up(): void
   {
-    Schema::drop('favorites');
+    Schema::table('recipe_steps', function (Blueprint $table) {
+      $table->string('image')->nullable()->change();
+    });
   }
 
   /**
@@ -19,12 +21,8 @@ return new class extends Migration
    */
   public function down(): void
   {
-    Schema::create('favorites', function (Blueprint $table) {
-      $table->id();
-      $table->foreignId('bookshelf_id')->constrained('bookshelves');
-      $table->string('article_type');
-      $table->bigInteger('article_id');
-      $table->timestamps();
+    Schema::table('recipe_steps', function (Blueprint $table) {
+      $table->string('image')->change();
     });
   }
 };

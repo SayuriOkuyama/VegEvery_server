@@ -16,7 +16,7 @@ return new class extends Migration
       $table->foreignId('user_id')->constrained('users');
       $table->string('title');
       $table->string('thumbnail');
-      $table->time('cooking_time');
+      $table->integer('cooking_time');
       $table->integer('number_of_likes');
       $table->integer('servings');
       $table->boolean('vegan');
