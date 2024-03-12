@@ -55,81 +55,77 @@ class RecipeController extends Controller
    */
   public function store(Request $request)
   {
-    $thumbnail = $request->thumbnail;
-    $stepImages = $request->stepImages;
+    $vege_types = [];
+    foreach ($request->values['vege_type'] as $type => $value) {
 
-    Log::debug($thumbnail);
-    Log::debug($stepImages);
-
-    $thumbnail = $request->file("thumbnail");
-    $stepImage = $request->file("stepImages");
-    Log::debug($thumbnail);
-    Log::debug($stepImage);
+      if ($value) {
+        $vege_types[$type] = 1;
+      } else {
+        $vege_types[$type] = 0;
+      }
+    }
 
     $article = ArticleOfRecipe::create([
       "user_id" => 1,
-      "title" => $request->title,
-      "thumbnail" => $request->thumbnail,
-      "cooking_time" => $request->time,
-      "servings" => $request->servings,
-      "vegan" => $request['vege_type']['vegan'],
-      "oriental_vegetarian" => $request['vege_type']['oriental_vegetarian'],
-      "ovo_vegetarian" => $request['vege_type']['ovo_vegetarian'],
-      "pescatarian" => $request['vege_type']['pescatarian'],
-      "lacto_vegetarian" => $request['vege_type']['lacto_vegetarian'],
-      "pollo_vegetarian" => $request['vege_type']['pollo_vegetarian'],
-      "fruitarian" => $request['vege_type']['fruitarian'],
-      "other_vegetarian" => $request['vege_type']['other_vegetarian'],
+      "title" => $request->values["title"],
+      "thumbnail" => $request->thumbnailUrl,
+      "cooking_time" => $request->values["time"],
+      "servings" => $request->values["servings"],
+      "vegan" => $vege_types['vegan'],
+      "oriental_vegetarian" => $vege_types['oriental_vegetarian'],
+      "ovo_vegetarian" => $vege_types['ovo_vegetarian'],
+      "pescatarian" => $vege_types['pescatarian'],
+      "lacto_vegetarian" => $vege_types['lacto_vegetarian'],
+      "pollo_vegetarian" => $vege_types['pollo_vegetarian'],
+      "fruitarian" => $vege_types['fruitarian'],
+      "other_vegetarian" => $vege_types['other_vegetarian'],
     ]);
 
-    foreach ($request["steps"] as $order => $step) {
-      $stepData = RecipeStep::create([
+    $stepsData = [];
+    foreach ($request->values["steps"] as $order => $step) {
+      $stepsData[] = RecipeStep::create([
         "article_of_recipe_id" => $article->id,
         "order" => $order + 1,
         "text" => $step["text"],
-        "image" => $request->stepImages[$order][$order],
+        "image" => $request->stepImageUrls[$order],
       ]);
     };
 
-    for ($i = 0; $i < count($request["materials"]); $i++) {
-      $materials = Material::create([
+    $materialsData = [];
+    for ($i = 0; $i < count($request->values["materials"]); $i++) {
+      $materialsData[] = Material::create([
         "article_of_recipe_id" => $article->id,
-        "name" => $request["materials"][$i]["material"],
-        "quantity" => $request["materials"][$i]['quantity'],
-        "unit" => $request["materials"][$i]['unit'],
+        "name" => $request->values["materials"][$i]["material"],
+        "quantity" => $request->values["materials"][$i]['quantity'],
+        "unit" => $request->values["materials"][$i]['unit'],
       ]);
     }
 
-    $tags = $request['tags'];
+    $tags = $request->values['tags'];
 
+    $tagsData = [];
+    $articleTagsData = [];
     foreach ($tags as $tag) {
       if ($tag !== null) {
         $tag_data = Tag::firstOrCreate(['name' => $tag["tag"]]);
+        $tagsData[] = $tag_data;
 
-        $article_tag = ArticleOfRecipeTag::create([
+        $articleTagsData[] = ArticleOfRecipeTag::create([
           'article_of_recipe_id' => $article->id,
           'tag_id' => $tag_data->id
         ]);
       }
     }
 
-    $supabaseUrl = env('SUPABASE_URL');
-    $apiKey = env('SUPABASE_APIKEY');
-    $bucketName = env('SUPABASE_BUCKET');
+    $response = [
+      "article" => $article,
+      "stepsData" => $stepsData,
+      "materialsData" => $materialsData,
+      "tagsData" => $tagsData,
+      "articleTagsData" => $articleTagsData
+    ];
 
-
-    // $filepath = $thumbnail->getClientOriginalName();
-    // $response = Http::withHeaders([
-    //   'Authorization' => 'Bearer ' . $apiKey,
-    // ])
-    //   ->attach('file', $filepath)
-    //   ->post("{$supabaseUrl}/storage/v1/object/{$bucketName}/recipes/thumbnail", [
-    //     'file' => fopen('/path/to/file', 'r')
-    //   ]);
-
-    // $fileURL = $response->json()['url'];
-
-    // return response()->json($fileURL);
+    return response()->json($response);
   }
 
   /**
