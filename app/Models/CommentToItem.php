@@ -18,12 +18,12 @@ class CommentToItem extends Model
     'text',
   ];
 
-  public function articlesOfItem()
+  public function articleOfItem()
   {
     return $this->belongsTo(ArticleOfItem::class);
   }
 
-  public function users()
+  public function user()
   {
     return $this->belongsTo(User::class);
   }

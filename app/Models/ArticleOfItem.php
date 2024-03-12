@@ -48,6 +48,6 @@ class ArticleOfItem extends Model
 
   public function tags()
   {
-    return $this->belongsToMany(Material::class);
+    return $this->belongsToMany(Tag::class);
   }
 }

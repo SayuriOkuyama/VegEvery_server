@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ArticleOfItem;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class FoodItemController extends Controller
@@ -27,6 +28,30 @@ class FoodItemController extends Controller
     $vegeTag = $request->vegeTag;
     $articles = ArticleOfItem::with('user')->where([$vegeTag => 1])->orderBy('number_of_likes', 'desc')->paginate(20);
     return response()->json($articles, 200);
+  }
+
+  public function get(string $id)
+  {
+    $article = ArticleOfItem::with('user', 'items', 'reports', 'commentsToItem', 'tags')->where('id', $id)->first();
+
+    $commentsWithUserName = [];
+    foreach ($article->commentsToItem as $comment) {
+      $user = User::find($comment->user_id);
+      $commentsWithUserName[] = [
+        "id" => $comment->id,
+        "userName" => $user->name,
+        "userIcon" => $user->icon,
+        "text" => $comment->text,
+        "likes" => $comment->number_of_likes
+      ];
+    };
+
+    $response = [
+      "article" => $article,
+      "comments" => $commentsWithUserName
+    ];
+
+    return response()->json($response, 200);
   }
 
   /**
