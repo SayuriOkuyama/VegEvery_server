@@ -11,7 +11,6 @@ use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
 
 class RecipeController extends Controller
 {
@@ -47,7 +46,24 @@ class RecipeController extends Controller
   {
     $article = ArticleOfRecipe::with('user', 'materials', 'recipeSteps', 'commentsToRecipe', 'tags')->where('id', $id)->first();
 
-    return response()->json($article, 200);
+    $commentsWithUserName = [];
+    foreach ($article->commentsToRecipe as $comment) {
+      $user = User::find($comment->user_id);
+      $commentsWithUserName[] = [
+        "id" => $comment->id,
+        "userName" => $user->name,
+        "userIcon" => $user->icon,
+        "text" => $comment->text,
+        "likes" => $comment->number_of_likes
+      ];
+    };
+
+    $response = [
+      "article" => $article,
+      "comments" => $commentsWithUserName
+    ];
+
+    return response()->json($response, 200);
   }
 
   /**
