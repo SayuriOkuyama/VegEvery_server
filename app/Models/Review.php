@@ -12,7 +12,8 @@ class Review extends Model
   protected $fillable = [
     'user_id',
     'display_name',
-    'thumbnail',
+    'thumbnail_path',
+    'thumbnail_url',
     'star',
     'text',
     'number_of_likes',

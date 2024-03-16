@@ -13,7 +13,8 @@ class RecipeStep extends Model
     'article_of_recipe_id',
     'order',
     'text',
-    'image',
+    'image_path',
+    'image_url',
   ];
 
   public function articlesOfRecipe()

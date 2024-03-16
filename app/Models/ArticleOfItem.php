@@ -13,7 +13,8 @@ class ArticleOfItem extends Model
 
   protected $fillable = [
     'title',
-    'thumbnail',
+    'thumbnail_path',
+    'thumbnail_url',
     'number_of_likes',
     'user_id',
     'vegan',

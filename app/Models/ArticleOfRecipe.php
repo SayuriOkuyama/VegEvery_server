@@ -14,7 +14,8 @@ class ArticleOfRecipe extends Model
 
   protected $fillable = [
     'title',
-    'thumbnail',
+    'thumbnail_path',
+    'thumbnail_url',
     'cooking_time',
     'number_of_likes',
     'user_id',

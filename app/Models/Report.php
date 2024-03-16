@@ -12,7 +12,8 @@ class Report extends Model
   protected $fillable = [
     'article_of_item_id',
     'order',
-    'image',
+    'image_path',
+    'image_url',
     'text',
   ];
 
