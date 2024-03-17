@@ -38,8 +38,8 @@ class DatabaseSeeder extends Seeder
 
     Tag::factory(20)->create();
 
-    ArticleOfItemTag::factory(50)->create();
-    ArticleOfRecipeTag::factory(50)->create();
+    ArticleOfItemTag::factory(200)->create();
+    ArticleOfRecipeTag::factory(200)->create();
 
     RecipeStep::factory(300)->recycle($articleOfRecipe)->create();
     Material::factory(300)->recycle($articleOfRecipe)->create();

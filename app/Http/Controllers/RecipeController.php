@@ -147,17 +147,121 @@ class RecipeController extends Controller
   /**
    * Display the specified resource.
    */
-  public function show(string $id)
-  {
-    //
-  }
+  // public function show(string $id)
+  // {
+  //   //
+  // }
 
   /**
    * Update the specified resource in storage.
    */
   public function update(Request $request, string $id)
   {
-    //
+    Log::debug($request);
+    $article = ArticleOfRecipe::with('user', 'materials')->where('id', $id)->first();
+
+    $article->title = $request->values["title"];
+    $article->cooking_time = $request->values["cooking_time"];
+    $article->servings = $request->values["servings"];
+    $article->thumbnail_path = $request->values["thumbnail"]["thumbnail_path"];
+    $article->thumbnail_url = $request->values["thumbnail"]["thumbnail_url"];
+    $article->vegan = $request->values["vegeTags"]["vegan"];
+    $article->oriental_vegetarian = $request->values["vegeTags"]["oriental_vegetarian"];
+    $article->ovo_vegetarian = $request->values["vegeTags"]["ovo_vegetarian"];
+    $article->pescatarian = $request->values["vegeTags"]["pescatarian"];
+    $article->lacto_vegetarian = $request->values["vegeTags"]["lacto_vegetarian"];
+    $article->pollo_vegetarian = $request->values["vegeTags"]["pollo_vegetarian"];
+    $article->fruitarian = $request->values["vegeTags"]["fruitarian"];
+    $article->other_vegetarian = $request->values["vegeTags"]["other_vegetarian"];
+    Log::debug("第１ステップ完了");
+
+    $newMaterials = $request->values["materials"];
+    $oldMaterials = $article->materials;
+    $maxMaterialsNum = max(count($newMaterials), count($oldMaterials));
+    $materialsData = [];
+    for ($i = 0; $i < $maxMaterialsNum; $i++) {
+      Log::debug($newMaterials[$i]);
+      Log::debug($oldMaterials[$i]);
+      if ($newMaterials[$i] && $oldMaterials[$i] && isset($newMaterials[$i]["id"]) && $newMaterials[$i]["id"] === $oldMaterials[$i]["id"]) {
+        $oldMaterials[$i]->name = $newMaterials[$i]["name"];
+        $oldMaterials[$i]->quantity = $newMaterials[$i]["quantity"];
+        $oldMaterials[$i]->unit = $newMaterials[$i]["unit"];
+      } else {
+        if ($newMaterials[$i]) {
+          $materialsData[] = Material::create([
+            "article_of_recipe_id" => $article->id,
+            "name" => $newMaterials[$i]["name"],
+            "quantity" => $newMaterials[$i]['quantity'],
+            "unit" => $newMaterials[$i]['unit'],
+          ]);
+        }
+        if ($oldMaterials[$i]) {
+          $oldMaterials[$i]->delete();
+        }
+      }
+    }
+    Log::debug("第２ステップ完了");
+
+    $oldSteps = RecipeStep::where('article_of_recipe_id', $article->id)->get();
+    $newSteps = $request->values["recipe_step"];
+    $stepsData = [];
+    Log::debug($oldSteps);
+
+    foreach ($oldSteps as $oldStep) {
+      $oldStep->delete();
+    }
+    Log::debug("第３ステップ完了");
+
+    for ($i = 0; $i < count($request->values["recipe_step"]["step_order_text"]); $i++) {
+      if (isset($newSteps["stepImages"][$i]["image_path"])) {
+        $stepsData[] = RecipeStep::create([
+          "article_of_recipe_id" => $article->id,
+          "order" => $newSteps["step_order_text"][$i]["order"],
+          "image_path" => $newSteps["stepImages"][$i]["image_path"],
+          "image_url" => $newSteps["stepImages"][$i]["image_url"],
+          "text" => $newSteps["step_order_text"][$i]["text"],
+        ]);
+      } else {
+        $stepsData[] = RecipeStep::create([
+          "article_of_recipe_id" => $article->id,
+          "order" => $newSteps["step_order_text"][$i]["order"],
+          "image_path" => "",
+          "image_url" => "",
+          "text" => $newSteps["step_order_text"][$i]["text"],
+        ]);
+      }
+    }
+    Log::debug("第４ステップ完了");
+
+    $newTags = $request->values['tags'];
+    $tagsData = [];
+    $articleTagsData = [];
+    $article_tags = ArticleOfRecipeTag::where(['article_of_recipe_id' => $article->id])->get();
+
+    if ($article_tags != null) {
+      foreach ($article_tags as $article_tag) {
+        $article_tag->delete();
+      }
+    }
+    Log::debug("第５ステップ完了");
+
+    foreach ($newTags as $newTag) {
+      if ($newTag["name"] !== null) {
+        $tag_data = Tag::firstOrCreate(['name' => $newTag["name"]]);
+        $tagsData[] = $tag_data;
+
+        $articleTagsData[] = ArticleOfRecipeTag::firstOrCreate([
+          'article_of_recipe_id' => $article->id,
+          'tag_id' => $tag_data->id
+        ]);
+      }
+    }
+    Log::debug("最終ステップ完了");
+    Log::debug($article);
+
+    $article->push();
+
+    return response()->json([$article, $stepsData, $tagsData, $articleTagsData]);
   }
 
   /**
