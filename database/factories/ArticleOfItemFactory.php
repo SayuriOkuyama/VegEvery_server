@@ -19,11 +19,11 @@ class ArticleOfItemFactory extends Factory
   {
     $thumbnail_path = fake()->randomElement(["items/thumbnail/brooke-lark-kXQ3J7_2fpc-unsplash.jpg", "items/thumbnail/haseeb-jamil-J9lD6FS6_cs-unsplash.jpg", "items/thumbnail/victoria-shes-4MEL9XS-3JQ-unsplash.jpg"]);
     if ($thumbnail_path === "items/thumbnail/brooke-lark-kXQ3J7_2fpc-unsplash.jpg") {
-      $thumbnail_url = "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object/public/VegEvery-backet/itemes/thumbnail/brooke-lark-kXQ3J7_2fpc-unsplash.jpg";
+      $thumbnail_url = "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object/public/VegEvery-backet/items/thumbnail/brooke-lark-kXQ3J7_2fpc-unsplash.jpg";
     } elseif ($thumbnail_path === "items/thumbnail/haseeb-jamil-J9lD6FS6_cs-unsplash.jpg") {
-      $thumbnail_url = "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object/public/VegEvery-backet/itemes/thumbnail/haseeb-jamil-J9lD6FS6_cs-unsplash.jpg";
+      $thumbnail_url = "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object/public/VegEvery-backet/items/thumbnail/haseeb-jamil-J9lD6FS6_cs-unsplash.jpg";
     } else {
-      $thumbnail_url = "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object/public/VegEvery-backet/itemes/thumbnail/victoria-shes-4MEL9XS-3JQ-unsplash.jpg";
+      $thumbnail_url = "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object/public/VegEvery-backet/items/thumbnail/victoria-shes-4MEL9XS-3JQ-unsplash.jpg";
     }
     return [
       'title' => fake()->realText($maxNbChars = 20),

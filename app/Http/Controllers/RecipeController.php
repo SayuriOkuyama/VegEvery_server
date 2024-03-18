@@ -30,7 +30,7 @@ class RecipeController extends Controller
   }
 
   /**
-   * Store a newly created resource in storage.
+   * タグ・ワード検索
    */
   public function search(Request $request)
   {
@@ -40,7 +40,7 @@ class RecipeController extends Controller
   }
 
   /**
-   * Show the form for creating a new resource.
+   * 個別記事情報取得
    */
   public function get(string $id)
   {
@@ -67,7 +67,7 @@ class RecipeController extends Controller
   }
 
   /**
-   * Store a newly created resource in storage.
+   * 新規投稿保存
    */
   public function store(Request $request)
   {
@@ -153,7 +153,7 @@ class RecipeController extends Controller
   // }
 
   /**
-   * Update the specified resource in storage.
+   * 記事更新
    */
   public function update(Request $request, string $id)
   {
