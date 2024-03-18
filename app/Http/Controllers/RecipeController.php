@@ -180,14 +180,16 @@ class RecipeController extends Controller
     $maxMaterialsNum = max(count($newMaterials), count($oldMaterials));
     $materialsData = [];
     for ($i = 0; $i < $maxMaterialsNum; $i++) {
-      Log::debug($newMaterials[$i]);
-      Log::debug($oldMaterials[$i]);
-      if ($newMaterials[$i] && $oldMaterials[$i] && isset($newMaterials[$i]["id"]) && $newMaterials[$i]["id"] === $oldMaterials[$i]["id"]) {
+      // Log::debug($newMaterials[$i]);
+      // Log::debug($oldMaterials[$i]);
+
+      if (isset($newMaterials[$i]) && isset($oldMaterials[$i]) && isset($newMaterials[$i]["id"]) && $newMaterials[$i]["id"] === $oldMaterials[$i]["id"]) {
         $oldMaterials[$i]->name = $newMaterials[$i]["name"];
         $oldMaterials[$i]->quantity = $newMaterials[$i]["quantity"];
         $oldMaterials[$i]->unit = $newMaterials[$i]["unit"];
       } else {
-        if ($newMaterials[$i]) {
+        if (isset($newMaterials[$i])) {
+          Log::debug("新しい材料あり");
           $materialsData[] = Material::create([
             "article_of_recipe_id" => $article->id,
             "name" => $newMaterials[$i]["name"],
@@ -195,7 +197,7 @@ class RecipeController extends Controller
             "unit" => $newMaterials[$i]['unit'],
           ]);
         }
-        if ($oldMaterials[$i]) {
+        if (isset($oldMaterials[$i])) {
           $oldMaterials[$i]->delete();
         }
       }
