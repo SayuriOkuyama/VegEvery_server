@@ -21,4 +21,26 @@ class Report extends Model
   {
     return $this->belongsTo(ArticleOfItem::class);
   }
+
+  public function articlesOfRecipe()
+  {
+    return $this->belongsTo(ArticleOfRecipe::class);
+  }
+
+  public static function search($keyword)
+  {
+    if (empty($keyword)) {
+      return static::query();
+    }
+
+    $search_columns = ['text'];
+
+    $search_query = static::query();
+
+    foreach ($search_columns as $column) {
+      $search_query->orWhereRaw("$column &@~ ?", [$keyword]);
+    }
+
+    return $search_query;
+  }
 }

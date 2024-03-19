@@ -34,9 +34,24 @@ class RecipeController extends Controller
    */
   public function search(Request $request)
   {
-    $vegeTag = $request->vegeTag;
-    $articles = ArticleOfRecipe::with('user')->where([$vegeTag => 1])->orderBy('number_of_likes', 'desc')->paginate(20);
-    return response()->json($articles, 200);
+    // $vegeTag = $request->vegeTag;
+    // $articles = ArticleOfRecipe::with('user')->where([$vegeTag => 1])->orderBy('number_of_likes', 'desc')->paginate(20);
+
+    $keyword = $request->query;
+    Log::debug($keyword);
+
+    $searchedArticles = ArticleOfRecipe::orWhereRaw("title &@~ ?", [$keyword])->get();
+    $searchedMaterials = Material::orWhereRaw("name &@~ ?", [$keyword])->get();
+    $searchedSteps = RecipeStep::orWhereRaw("text &@~ ?", [$keyword])->get();
+
+    $articleIds = $searchedArticles->pluck('id')->toArray();
+    $articleIdsFromMaterials = $searchedMaterials->pluck('article_id')->toArray();
+    $articleIdsFromSteps = $searchedSteps->pluck('article_id')->toArray();
+
+    $uniqueIds = array_unique(array_merge($articleIds, $articleIdsFromMaterials, $articleIdsFromSteps));
+    $uniqueSearchedArticles = ArticleOfRecipe::with('user', 'materials', 'recipeSteps', 'commentsToRecipe', 'tags')->whereIn('id', $uniqueIds)->orderBy('number_of_likes', 'desc')->paginate(20);
+
+    return response()->json($uniqueSearchedArticles, 200);
   }
 
   /**
