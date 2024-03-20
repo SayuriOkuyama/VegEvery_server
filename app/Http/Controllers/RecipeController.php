@@ -36,9 +36,10 @@ class RecipeController extends Controller
   {
     Log::debug($request);
     $keyword = $request->search;
+    $vegeTag = $request->type;
+
     if (!$keyword || $keyword == "null") {
-      Log::debug("ワードなし");
-      $articles = ArticleOfRecipe::with('user')->orderBy('updated_at', 'desc')->paginate(20);
+      $articles = ArticleOfRecipe::with('user')->where([$vegeTag => true])->orderBy('updated_at', 'desc')->paginate(20);
       return response()->json($articles, 200);
     } else {
       $searchedArticles = ArticleOfRecipe::orWhereRaw("title &@~ ?", [$keyword])->get();
@@ -52,7 +53,7 @@ class RecipeController extends Controller
       $articleIdsFromTags = $searchedTags->pluck('id')->toArray();
 
       $uniqueIds = array_unique(array_merge($articleIds, $articleIdsFromMaterials, $articleIdsFromSteps, $articleIdsFromTags));
-      $uniqueSearchedArticles = ArticleOfRecipe::with('user')->whereIn('id', $uniqueIds)->orderBy('updated_at', 'desc')->paginate(20);
+      $uniqueSearchedArticles = ArticleOfRecipe::with('user')->whereIn('id', $uniqueIds)->where([$vegeTag => true])->orderBy('updated_at', 'desc')->paginate(20);
       return response()->json($uniqueSearchedArticles, 200);
     }
   }
