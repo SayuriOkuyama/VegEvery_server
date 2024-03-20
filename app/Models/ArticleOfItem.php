@@ -51,4 +51,21 @@ class ArticleOfItem extends Model
   {
     return $this->belongsToMany(Tag::class);
   }
+
+  public static function search($keyword)
+  {
+    if (empty($keyword)) {
+      return static::query();
+    }
+
+    $search_columns = ['title'];
+
+    $search_query = static::query();
+
+    foreach ($search_columns as $column) {
+      $search_query->orWhereRaw("$column &@~ ?", [$keyword]);
+    }
+
+    return $search_query;
+  }
 }
