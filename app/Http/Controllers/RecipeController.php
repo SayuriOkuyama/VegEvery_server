@@ -218,21 +218,22 @@ class RecipeController extends Controller
     Log::debug($request);
     $article = ArticleOfRecipe::with('user', 'materials')->where('id', $id)->first();
 
-    $article->title = $request->values["title"];
-    $article->cooking_time = $request->values["cooking_time"];
-    $article->servings = $request->values["servings"];
-    $article->thumbnail_path = $request->values["thumbnail"]["thumbnail_path"];
-    $article->thumbnail_url = $request->values["thumbnail"]["thumbnail_url"];
-    $article->vegan = $request->values["vegeTags"]["vegan"];
-    $article->oriental_vegetarian = $request->values["vegeTags"]["oriental_vegetarian"];
-    $article->ovo_vegetarian = $request->values["vegeTags"]["ovo_vegetarian"];
-    $article->pescatarian = $request->values["vegeTags"]["pescatarian"];
-    $article->lacto_vegetarian = $request->values["vegeTags"]["lacto_vegetarian"];
-    $article->pollo_vegetarian = $request->values["vegeTags"]["pollo_vegetarian"];
-    $article->fruitarian = $request->values["vegeTags"]["fruitarian"];
-    $article->other_vegetarian = $request->values["vegeTags"]["other_vegetarian"];
+    $article->title = $request->title;
+    $article->cooking_time = $request->cooking_time;
+    $article->servings = $request->servings;
+    $article->thumbnail_path = $request->thumbnail["thumbnail_path"];
+    $article->thumbnail_url = $request->thumbnail["thumbnail_url"];
+    $article->vegan = $request->vegeTags["vegan"];
+    $article->oriental_vegetarian = $request->vegeTags["oriental_vegetarian"];
+    $article->ovo_vegetarian = $request->vegeTags["ovo_vegetarian"];
+    $article->pescatarian = $request->vegeTags["pescatarian"];
+    $article->lacto_vegetarian = $request->vegeTags["lacto_vegetarian"];
+    $article->pollo_vegetarian = $request->vegeTags["pollo_vegetarian"];
+    $article->fruitarian = $request->vegeTags["fruitarian"];
+    $article->other_vegetarian = $request->vegeTags["other_vegetarian"];
+    $article->push();
 
-    $newMaterials = $request->values["materials"];
+    $newMaterials = $request->materials;
     $oldMaterials = $article->materials;
     $maxMaterialsNum = max(count($newMaterials), count($oldMaterials));
     $materialsData = [];
@@ -258,7 +259,7 @@ class RecipeController extends Controller
     }
 
     $oldSteps = RecipeStep::where('article_of_recipe_id', $article->id)->get();
-    $newSteps = $request->values["recipe_step"];
+    $newSteps = $request->recipe_step;
     $stepsData = [];
     Log::debug($oldSteps);
 
@@ -266,7 +267,7 @@ class RecipeController extends Controller
       $oldStep->delete();
     }
 
-    for ($i = 0; $i < count($request->values["recipe_step"]["step_order_text"]); $i++) {
+    for ($i = 0; $i < count($newSteps["step_order_text"]); $i++) {
       if (isset($newSteps["stepImages"][$i]["image_path"])) {
         $stepsData[] = RecipeStep::create([
           "article_of_recipe_id" => $article->id,
@@ -286,7 +287,6 @@ class RecipeController extends Controller
       }
     }
 
-    $newTags = $request->values['tags'];
     $tagsData = [];
     $articleTagsData = [];
     $article_tags = ArticleOfRecipeTag::where(['article_of_recipe_id' => $article->id])->get();
@@ -297,7 +297,7 @@ class RecipeController extends Controller
       }
     }
 
-    foreach ($newTags as $newTag) {
+    foreach ($request->tags as $newTag) {
       if ($newTag["name"] !== null) {
         $tag_data = Tag::firstOrCreate(['name' => $newTag["name"]]);
         $tagsData[] = $tag_data;
@@ -309,9 +309,15 @@ class RecipeController extends Controller
       }
     }
 
-    $article->push();
+    $response = [
+      "article" => $article,
+      "stepsData" => $stepsData,
+      "materialsData" => $materialsData,
+      "tagsData" => $tagsData,
+      "articleTagsData" => $articleTagsData
+    ];
 
-    return response()->json([$article, $stepsData, $tagsData, $articleTagsData]);
+    return response()->json($response);
   }
 
   /**

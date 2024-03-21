@@ -113,7 +113,7 @@ class FoodItemController extends Controller
 
     $reportsData = [];
     for ($i = 0; $i < count($request->reports["reports_order_text"]); $i++) {
-      if (isset($request->recipe_step["reportImages"][$i]["image_path"])) {
+      if (isset($request->reports["reportImages"][$i]["image_path"])) {
         $reportsData[] = Report::create([
           "article_of_item_id" => $article->id,
           "order" => $request->reports["reports_order_text"][$i]["order"],
@@ -141,6 +141,7 @@ class FoodItemController extends Controller
         "price" => $request->items[$i]['price'],
       ]);
     }
+    Log::debug($itemsData);
 
     $tagsData = [];
     $articleTagsData = [];
@@ -196,20 +197,12 @@ class FoodItemController extends Controller
   }
 
   /**
-   * Show the form for editing the specified resource.
-   */
-  public function edit(string $id)
-  {
-    //
-  }
-
-  /**
-   * Update the specified resource in storage.
+   * 投稿記事更新
    */
   public function update(Request $request, string $id)
   {
     Log::debug($request);
-    $article = ArticleOfItem::with('user')->where('id', $id)->first();
+    $article = ArticleOfItem::with('user', "items")->where('id', $id)->first();
 
     $article->title = $request->title;
     $article->thumbnail_path = $request->thumbnail["thumbnail_path"];
@@ -223,42 +216,16 @@ class FoodItemController extends Controller
     $article->fruitarian = $request->vegeTags["fruitarian"];
     $article->other_vegetarian = $request->vegeTags["other_vegetarian"];
 
-    $newItems = $request->items;
-    $oldItems = $article->items;
-    $maxItemsNum = max(count($newItems), count($oldItems));
-    $itemsData = [];
-    for ($i = 0; $i < $maxItemsNum; $i++) {
-      if (isset($newItems[$i]) && isset($oldItems[$i]) && isset($newItems[$i]["id"]) && $newItems[$i]["id"] === $oldItems[$i]["id"]) {
-        $oldItems[$i]->name = $newItems[$i]["name"];
-        $oldItems[$i]->where_to_buy = $newItems[$i]["where_to_buy"];
-        $oldItems[$i]->price = $newItems[$i]["price"];
-      } else {
-        if (isset($newItems[$i])) {
-          Log::debug("新しい材料あり");
-          $itemsData[] = Item::create([
-            "article_of_item_id" => $article->id,
-            "name" => $newItems[$i]["name"],
-            "where_to_buy" => $newItems[$i]['where_to_buy'],
-            "price" => $newItems[$i]['price'],
-          ]);
-        }
-        if (isset($oldItems[$i])) {
-          $oldItems[$i]->delete();
-        }
-      }
-    }
-
     $oldReports = Report::where('article_of_item_id', $article->id)->get();
     $newReports = $request->reports;
     $reportsData = [];
-    Log::debug($oldReports);
 
     foreach ($oldReports as $oldReport) {
       $oldReport->delete();
     }
 
     for ($i = 0; $i < count($request->reports["report_order_text"]); $i++) {
-      if (isset($newSteps["reportImages"][$i]["image_path"])) {
+      if (isset($newReports["reportImages"][$i]["image_path"])) {
         $reportsData[] = Report::create([
           "article_of_item_id" => $article->id,
           "order" => $newReports["report_order_text"][$i]["order"],
@@ -301,7 +268,49 @@ class FoodItemController extends Controller
 
     $article->push();
 
-    return response()->json([$article, $reportsData, $itemsData, $tagsData, $articleTagsData]);
+    $newItems = $request->items;
+    $oldItems = $article->items;
+    Log::debug("newItems↓");
+    Log::debug($newItems);
+    Log::debug("oldItems↓");
+    Log::debug($oldItems);
+    $maxItemsNum = max(count($newItems), count($oldItems));
+    $itemsData = [];
+    for ($i = 0; $i < $maxItemsNum; $i++) {
+      if (isset($newItems[$i]) && isset($oldItems[$i]) && isset($newItems[$i]["id"]) && $newItems[$i]["id"] === $oldItems[$i]["id"]) {
+        $oldItems[$i]->name = $newItems[$i]["name"];
+        $oldItems[$i]->where_to_buy = $newItems[$i]["where_to_buy"];
+        $oldItems[$i]->price = $newItems[$i]["price"];
+      } else {
+        Log::debug("id違う");
+        if (isset($newItems[$i])) {
+          Log::debug("新しい材料あり");
+          $itemsData[] = Item::create([
+            "article_of_item_id" => $article->id,
+            "name" => $newItems[$i]["name"],
+            "where_to_buy" => $newItems[$i]['where_to_buy'],
+            "price" => $newItems[$i]['price'],
+          ]);
+        }
+        if (isset($oldItems[$i])) {
+          Log::debug("古い材料削除");
+          Log::debug($oldItems[$i]);
+          $oldItems[$i]->delete();
+        }
+      }
+    }
+    Log::debug("itemsData↓");
+    Log::debug($itemsData);
+
+    $response = [
+      "article" => $article,
+      "reportsData" => $reportsData,
+      "itemsData" => $itemsData,
+      "tagsData" => $tagsData,
+      "articleTagsData" => $articleTagsData
+    ];
+
+    return response()->json($response);
   }
 
   /**
