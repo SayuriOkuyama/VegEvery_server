@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ArticleOfItem;
 use App\Models\ArticleOfItemTag;
+use App\Models\CommentToItem;
 use App\Models\Item;
 use App\Models\Report;
 use App\Models\Tag;
@@ -28,11 +29,40 @@ class FoodItemController extends Controller
     }
   }
 
+  /**
+   * ワード検索
+   */
   public function search(Request $request)
   {
-    $vegeTag = $request->vegeTag;
-    $articles = ArticleOfItem::with('user')->where([$vegeTag => 1])->orderBy('number_of_likes', 'desc')->paginate(20);
-    return response()->json($articles, 200);
+    Log::debug($request);
+    $keyword = $request->search;
+    $vegeTag = $request->type;
+    Log::debug($keyword);
+    Log::debug($vegeTag);
+
+    if (!$keyword || ($keyword == "null")) {
+      if ($vegeTag !== "null" || !$vegeTag) {
+        $articles = ArticleOfItem::with('user')->where([$vegeTag => true])->orderBy('updated_at', 'desc')->paginate(20);
+        return response()->json($articles, 200);
+      } else {
+        $articles = ArticleOfItem::with('user')->where(["vegan" => true])->orderBy('updated_at', 'desc')->paginate(20);
+        return response()->json($articles, 200);
+      }
+    } else {
+      $searchedArticles = ArticleOfItem::orWhereRaw("title &@~ ?", [$keyword])->get();
+      $searchedItems = Item::orWhereRaw("name &@~ ?", [$keyword])->get();
+      $searchedReports = Report::orWhereRaw("text &@~ ?", [$keyword])->get();
+      $searchedTags = Tag::orWhereRaw("name &@~ ?", [$keyword])->with("articlesOfItem")->get();
+
+      $articleIds = $searchedArticles->pluck('id')->toArray();
+      $articleIdsFromItems = $searchedItems->pluck('article_id')->toArray();
+      $articleIdsFromReports = $searchedReports->pluck('article_id')->toArray();
+      $articleIdsFromTags = $searchedTags->pluck('id')->toArray();
+
+      $uniqueIds = array_unique(array_merge($articleIds, $articleIdsFromItems, $articleIdsFromReports, $articleIdsFromTags));
+      $uniqueSearchedArticles = ArticleOfItem::with('user')->whereIn('id', $uniqueIds)->where([$vegeTag => true])->orderBy('updated_at', 'desc')->paginate(20);
+      return response()->json($uniqueSearchedArticles, 200);
+    }
   }
 
   public function get(string $id)
@@ -60,75 +90,61 @@ class FoodItemController extends Controller
   }
 
   /**
-   * Store a newly created resource in storage.
+   * 新規投稿保存
    */
   public function store(Request $request)
   {
     Log::debug($request);
-    // $vege_types = [];
-    // foreach ($request->values['vegeTags'] as $type => $value) {
-
-    //   if ($value) {
-    //     $vege_types[$type] = 1;
-    //   } else {
-    //     $vege_types[$type] = 0;
-    //   }
-    // }
 
     $article = ArticleOfItem::create([
       "user_id" => 1,
-      "title" => $request->values["title"],
-      "thumbnail_path" => $request->values["thumbnail"]["thumbnail_path"],
-      "thumbnail_url" => $request->values["thumbnail"]["thumbnail_url"],
-      "vegan" => $request->values["vegeTags"]['vegan'],
-      "oriental_vegetarian" => $request->values["vegeTags"]['oriental_vegetarian'],
-      "ovo_vegetarian" => $request->values["vegeTags"]['ovo_vegetarian'],
-      "pescatarian" => $request->values["vegeTags"]['pescatarian'],
-      "lacto_vegetarian" => $request->values["vegeTags"]['lacto_vegetarian'],
-      "pollo_vegetarian" => $request->values["vegeTags"]['pollo_vegetarian'],
-      "fruitarian" => $request->values["vegeTags"]['fruitarian'],
-      "other_vegetarian" => $request->values["vegeTags"]['other_vegetarian'],
+      "title" => $request->title,
+      "thumbnail_path" => $request->thumbnail["thumbnail_path"],
+      "thumbnail_url" => $request->thumbnail["thumbnail_url"],
+      "vegan" => $request->vegeTags['vegan'],
+      "oriental_vegetarian" => $request->vegeTags['oriental_vegetarian'],
+      "ovo_vegetarian" => $request->vegeTags['ovo_vegetarian'],
+      "pescatarian" => $request->vegeTags['pescatarian'],
+      "lacto_vegetarian" => $request->vegeTags['lacto_vegetarian'],
+      "pollo_vegetarian" => $request->vegeTags['pollo_vegetarian'],
+      "fruitarian" => $request->vegeTags['fruitarian'],
+      "other_vegetarian" => $request->vegeTags['other_vegetarian'],
     ]);
-    Log::debug("第１ステップ完了");
 
     $reportsData = [];
-    foreach ($request->values["reports"]["reports_order_text"] as $index => $report) {
-      if (isset($request->values["reports"]["reportImages"][$index]["image_path"])) {
+    for ($i = 0; $i < count($request->reports["reports_order_text"]); $i++) {
+      if (isset($request->recipe_step["reportImages"][$i]["image_path"])) {
         $reportsData[] = Report::create([
           "article_of_item_id" => $article->id,
-          "order" => $report["order"],
-          "text" => $report["text"],
-          "image_path" => $request->values["reports"]["reportImages"][$index]["image_path"],
-          "image_url" => $request->values["reports"]["reportImages"][$index]["image_url"]
+          "order" => $request->reports["reports_order_text"][$i]["order"],
+          "image_path" => $request->reports["reportImages"][$i]["image_path"],
+          "image_url" => $request->reports["reportImages"][$i]["image_url"],
+          "text" => $request->reports["reports_order_text"][$i]["text"],
         ]);
       } else {
         $reportsData[] = Report::create([
           "article_of_item_id" => $article->id,
-          "order" => $report["order"],
-          "text" => $report["text"],
+          "order" => $request->reports["reports_order_text"][$i]["order"],
           "image_path" => "",
-          "image_url" => ""
+          "image_url" => "",
+          "text" => $request->reports["reports_order_text"][$i]["text"],
         ]);
       }
-    };
-    Log::debug("第２ステップ完了");
+    }
 
     $itemsData = [];
-    for ($i = 0; $i < count($request->values["items"]); $i++) {
+    for ($i = 0; $i < count($request->items); $i++) {
       $itemsData[] = Item::create([
         "article_of_item_id" => $article->id,
-        "name" => $request->values["items"][$i]["name"],
-        "where_to_buy" => $request->values["items"][$i]['place'],
-        "price" => $request->values["items"][$i]['price'],
+        "name" => $request->items[$i]["name"],
+        "where_to_buy" => $request->items[$i]['place'],
+        "price" => $request->items[$i]['price'],
       ]);
     }
-    Log::debug("第３ステップ完了");
-
-    $tags = $request->values['tags'];
 
     $tagsData = [];
     $articleTagsData = [];
-    foreach ($tags as $tag) {
+    foreach ($request->tags as $tag) {
       if ($tag !== null) {
         $tag_data = Tag::firstOrCreate(['name' => $tag["tag"]]);
         $tagsData[] = $tag_data;
@@ -139,8 +155,6 @@ class FoodItemController extends Controller
         ]);
       }
     }
-    Log::debug("第４ステップ完了");
-
 
     $response = [
       "article" => $article,
@@ -154,11 +168,31 @@ class FoodItemController extends Controller
   }
 
   /**
-   * Display the specified resource.
+   * コメント投稿
    */
-  public function show(string $id)
+  public function commentStore(Request $request, string $id)
   {
-    //
+    Log::debug($request);
+    Log::debug($id);
+    // 仮にユーザー１とする
+    $user = User::find(1);
+    $commentData = CommentToItem::create([
+      "article_of_item_id" => $id,
+      "user_id" => $user->id,
+      "text" => $request->text
+    ]);
+    Log::debug($commentData);
+
+    $commentWithUserName = [
+      "id" => $commentData->id,
+      "userName" => $user->name,
+      "userIcon" => $user->icon,
+      "text" => $commentData->text,
+      "likes" => $commentData->number_of_likes
+    ];
+    Log::debug($commentWithUserName);
+
+    return response()->json($commentWithUserName);
   }
 
   /**
@@ -174,7 +208,100 @@ class FoodItemController extends Controller
    */
   public function update(Request $request, string $id)
   {
-    //
+    Log::debug($request);
+    $article = ArticleOfItem::with('user')->where('id', $id)->first();
+
+    $article->title = $request->title;
+    $article->thumbnail_path = $request->thumbnail["thumbnail_path"];
+    $article->thumbnail_url = $request->thumbnail["thumbnail_url"];
+    $article->vegan = $request->vegeTags["vegan"];
+    $article->oriental_vegetarian = $request->vegeTags["oriental_vegetarian"];
+    $article->ovo_vegetarian = $request->vegeTags["ovo_vegetarian"];
+    $article->pescatarian = $request->vegeTags["pescatarian"];
+    $article->lacto_vegetarian = $request->vegeTags["lacto_vegetarian"];
+    $article->pollo_vegetarian = $request->vegeTags["pollo_vegetarian"];
+    $article->fruitarian = $request->vegeTags["fruitarian"];
+    $article->other_vegetarian = $request->vegeTags["other_vegetarian"];
+
+    $newItems = $request->items;
+    $oldItems = $article->items;
+    $maxItemsNum = max(count($newItems), count($oldItems));
+    $itemsData = [];
+    for ($i = 0; $i < $maxItemsNum; $i++) {
+      if (isset($newItems[$i]) && isset($oldItems[$i]) && isset($newItems[$i]["id"]) && $newItems[$i]["id"] === $oldItems[$i]["id"]) {
+        $oldItems[$i]->name = $newItems[$i]["name"];
+        $oldItems[$i]->where_to_buy = $newItems[$i]["where_to_buy"];
+        $oldItems[$i]->price = $newItems[$i]["price"];
+      } else {
+        if (isset($newItems[$i])) {
+          Log::debug("新しい材料あり");
+          $itemsData[] = Item::create([
+            "article_of_item_id" => $article->id,
+            "name" => $newItems[$i]["name"],
+            "where_to_buy" => $newItems[$i]['where_to_buy'],
+            "price" => $newItems[$i]['price'],
+          ]);
+        }
+        if (isset($oldItems[$i])) {
+          $oldItems[$i]->delete();
+        }
+      }
+    }
+
+    $oldReports = Report::where('article_of_item_id', $article->id)->get();
+    $newReports = $request->reports;
+    $reportsData = [];
+    Log::debug($oldReports);
+
+    foreach ($oldReports as $oldReport) {
+      $oldReport->delete();
+    }
+
+    for ($i = 0; $i < count($request->reports["report_order_text"]); $i++) {
+      if (isset($newSteps["reportImages"][$i]["image_path"])) {
+        $reportsData[] = Report::create([
+          "article_of_item_id" => $article->id,
+          "order" => $newReports["report_order_text"][$i]["order"],
+          "image_path" => $newReports["reportImages"][$i]["image_path"],
+          "image_url" => $newReports["reportImages"][$i]["image_url"],
+          "text" => $newReports["report_order_text"][$i]["text"],
+        ]);
+      } else {
+        $reportsData[] = Report::create([
+          "article_of_item_id" => $article->id,
+          "order" => $newReports["report_order_text"][$i]["order"],
+          "image_path" => "",
+          "image_url" => "",
+          "text" => $newReports["report_order_text"][$i]["text"],
+        ]);
+      }
+    }
+
+    $tagsData = [];
+    $articleTagsData = [];
+    $article_tags = ArticleOfItemTag::where(['article_of_item_id' => $article->id])->get();
+
+    if ($article_tags != null) {
+      foreach ($article_tags as $article_tag) {
+        $article_tag->delete();
+      }
+    }
+
+    foreach ($request->tags as $newTag) {
+      if ($newTag["name"] !== null) {
+        $tag_data = Tag::firstOrCreate(['name' => $newTag["name"]]);
+        $tagsData[] = $tag_data;
+
+        $articleTagsData[] = ArticleOfItemTag::firstOrCreate([
+          'article_of_item_id' => $article->id,
+          'tag_id' => $tag_data->id
+        ]);
+      }
+    }
+
+    $article->push();
+
+    return response()->json([$article, $reportsData, $itemsData, $tagsData, $articleTagsData]);
   }
 
   /**
