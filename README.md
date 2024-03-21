@@ -1,4 +1,4 @@
-# VegEvery_client
+# VegEvery_server
 
 アプレンティスのオリジナルプロダクト用リポジトリです。 こちらはサーバーサイドです。
 

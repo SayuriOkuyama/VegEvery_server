@@ -36,9 +36,10 @@ class RecipeController extends Controller
   {
     Log::debug($request);
     $keyword = $request->search;
+    $vegeTag = $request->type;
+
     if (!$keyword || $keyword == "null") {
-      Log::debug("ワードなし");
-      $articles = ArticleOfRecipe::with('user')->orderBy('updated_at', 'desc')->paginate(20);
+      $articles = ArticleOfRecipe::with('user')->where([$vegeTag => true])->orderBy('updated_at', 'desc')->paginate(20);
       return response()->json($articles, 200);
     } else {
       $searchedArticles = ArticleOfRecipe::orWhereRaw("title &@~ ?", [$keyword])->get();
@@ -52,7 +53,7 @@ class RecipeController extends Controller
       $articleIdsFromTags = $searchedTags->pluck('id')->toArray();
 
       $uniqueIds = array_unique(array_merge($articleIds, $articleIdsFromMaterials, $articleIdsFromSteps, $articleIdsFromTags));
-      $uniqueSearchedArticles = ArticleOfRecipe::with('user')->whereIn('id', $uniqueIds)->orderBy('updated_at', 'desc')->paginate(20);
+      $uniqueSearchedArticles = ArticleOfRecipe::with('user')->whereIn('id', $uniqueIds)->where([$vegeTag => true])->orderBy('updated_at', 'desc')->paginate(20);
       return response()->json($uniqueSearchedArticles, 200);
     }
   }
@@ -163,12 +164,32 @@ class RecipeController extends Controller
   }
 
   /**
-   * Display the specified resource.
+   * コメント投稿
    */
-  // public function show(string $id)
-  // {
-  //   //
-  // }
+  public function commentStore(Request $request, string $id)
+  {
+    Log::debug($request);
+    Log::debug($id);
+    // 仮にユーザー１とする
+    $user = User::find(1);
+    $commentData = CommentToRecipe::create([
+      "article_of_recipe_id" => $id,
+      "user_id" => $user->id,
+      "text" => $request->text
+    ]);
+    Log::debug($commentData);
+
+    $commentWithUserName = [
+      "id" => $commentData->id,
+      "userName" => $user->name,
+      "userIcon" => $user->icon,
+      "text" => $commentData->text,
+      "likes" => $commentData->number_of_likes
+    ];
+    Log::debug($commentWithUserName);
+
+    return response()->json($commentWithUserName);
+  }
 
   /**
    * 記事更新
@@ -191,16 +212,12 @@ class RecipeController extends Controller
     $article->pollo_vegetarian = $request->values["vegeTags"]["pollo_vegetarian"];
     $article->fruitarian = $request->values["vegeTags"]["fruitarian"];
     $article->other_vegetarian = $request->values["vegeTags"]["other_vegetarian"];
-    Log::debug("第１ステップ完了");
 
     $newMaterials = $request->values["materials"];
     $oldMaterials = $article->materials;
     $maxMaterialsNum = max(count($newMaterials), count($oldMaterials));
     $materialsData = [];
     for ($i = 0; $i < $maxMaterialsNum; $i++) {
-      // Log::debug($newMaterials[$i]);
-      // Log::debug($oldMaterials[$i]);
-
       if (isset($newMaterials[$i]) && isset($oldMaterials[$i]) && isset($newMaterials[$i]["id"]) && $newMaterials[$i]["id"] === $oldMaterials[$i]["id"]) {
         $oldMaterials[$i]->name = $newMaterials[$i]["name"];
         $oldMaterials[$i]->quantity = $newMaterials[$i]["quantity"];
@@ -220,7 +237,6 @@ class RecipeController extends Controller
         }
       }
     }
-    Log::debug("第２ステップ完了");
 
     $oldSteps = RecipeStep::where('article_of_recipe_id', $article->id)->get();
     $newSteps = $request->values["recipe_step"];
@@ -230,7 +246,6 @@ class RecipeController extends Controller
     foreach ($oldSteps as $oldStep) {
       $oldStep->delete();
     }
-    Log::debug("第３ステップ完了");
 
     for ($i = 0; $i < count($request->values["recipe_step"]["step_order_text"]); $i++) {
       if (isset($newSteps["stepImages"][$i]["image_path"])) {
@@ -251,7 +266,6 @@ class RecipeController extends Controller
         ]);
       }
     }
-    Log::debug("第４ステップ完了");
 
     $newTags = $request->values['tags'];
     $tagsData = [];
@@ -263,7 +277,6 @@ class RecipeController extends Controller
         $article_tag->delete();
       }
     }
-    Log::debug("第５ステップ完了");
 
     foreach ($newTags as $newTag) {
       if ($newTag["name"] !== null) {
@@ -276,8 +289,6 @@ class RecipeController extends Controller
         ]);
       }
     }
-    Log::debug("最終ステップ完了");
-    Log::debug($article);
 
     $article->push();
 
