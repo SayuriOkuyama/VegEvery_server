@@ -98,7 +98,6 @@ class RecipeController extends Controller
     Log::debug($request);
     $vege_types = [];
     foreach ($request->vege_type as $type => $value) {
-
       if ($value) {
         $vege_types[$type] = true;
       } else {
