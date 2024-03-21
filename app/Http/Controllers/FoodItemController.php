@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ArticleOfItem;
 use App\Models\ArticleOfItemTag;
+use App\Models\CommentToItem;
 use App\Models\Item;
 use App\Models\Report;
 use App\Models\Tag;
@@ -60,92 +61,89 @@ class FoodItemController extends Controller
   }
 
   /**
-   * Store a newly created resource in storage.
+   * 新規投稿保存
    */
   public function store(Request $request)
   {
     Log::debug($request);
-    // $vege_types = [];
-    // foreach ($request->values['vegeTags'] as $type => $value) {
+    $vege_types = [];
+    foreach ($request->vege_type as $type => $value) {
 
-    //   if ($value) {
-    //     $vege_types[$type] = 1;
-    //   } else {
-    //     $vege_types[$type] = 0;
-    //   }
-    // }
+      if ($value) {
+        $vege_types[$type] = true;
+      } else {
+        $vege_types[$type] = false;
+      }
+    }
+    Log::debug("ステップ１完了");
 
     $article = ArticleOfItem::create([
       "user_id" => 1,
-      "title" => $request->values["title"],
-      "thumbnail_path" => $request->values["thumbnail"]["thumbnail_path"],
-      "thumbnail_url" => $request->values["thumbnail"]["thumbnail_url"],
-      "vegan" => $request->values["vegeTags"]['vegan'],
-      "oriental_vegetarian" => $request->values["vegeTags"]['oriental_vegetarian'],
-      "ovo_vegetarian" => $request->values["vegeTags"]['ovo_vegetarian'],
-      "pescatarian" => $request->values["vegeTags"]['pescatarian'],
-      "lacto_vegetarian" => $request->values["vegeTags"]['lacto_vegetarian'],
-      "pollo_vegetarian" => $request->values["vegeTags"]['pollo_vegetarian'],
-      "fruitarian" => $request->values["vegeTags"]['fruitarian'],
-      "other_vegetarian" => $request->values["vegeTags"]['other_vegetarian'],
+      "title" => $request->title,
+      "thumbnail_path" => $request->thumbnail["thumbnail_path"],
+      "thumbnail_url" => $request->thumbnail["thumbnail_url"],
+      "vegan" => $vege_types['vegan'],
+      "oriental_vegetarian" => $vege_types['oriental_vegetarian'],
+      "ovo_vegetarian" => $vege_types['ovo_vegetarian'],
+      "pescatarian" => $vege_types['pescatarian'],
+      "lacto_vegetarian" => $vege_types['lacto_vegetarian'],
+      "pollo_vegetarian" => $vege_types['pollo_vegetarian'],
+      "fruitarian" => $vege_types['fruitarian'],
+      "other_vegetarian" => $vege_types['other_vegetarian'],
     ]);
-    Log::debug("第１ステップ完了");
+    Log::debug("ステップ２完了");
 
-    $reportsData = [];
-    foreach ($request->values["reports"]["reports_order_text"] as $index => $report) {
-      if (isset($request->values["reports"]["reportImages"][$index]["image_path"])) {
-        $reportsData[] = Report::create([
-          "article_of_item_id" => $article->id,
-          "order" => $report["order"],
-          "text" => $report["text"],
-          "image_path" => $request->values["reports"]["reportImages"][$index]["image_path"],
-          "image_url" => $request->values["reports"]["reportImages"][$index]["image_url"]
+
+    $stepsData = [];
+    for ($i = 0; $i < count($request->recipe_step["step_order_text"]); $i++) {
+      if (isset($request->recipe_step["stepImages"][$i]["image_path"])) {
+        $stepsData[] = Report::create([
+          "article_of_recipe_id" => $article->id,
+          "order" => $request->recipe_step["step_order_text"][$i]["order"],
+          "image_path" => $request->recipe_step["stepImages"][$i]["image_path"],
+          "image_url" => $request->recipe_step["stepImages"][$i]["image_url"],
+          "text" => $request->recipe_step["step_order_text"][$i]["text"],
         ]);
       } else {
-        $reportsData[] = Report::create([
-          "article_of_item_id" => $article->id,
-          "order" => $report["order"],
-          "text" => $report["text"],
+        $stepsData[] = Report::create([
+          "article_of_recipe_id" => $article->id,
+          "order" => $request->recipe_step["step_order_text"][$i]["order"],
           "image_path" => "",
-          "image_url" => ""
+          "image_url" => "",
+          "text" => $request->recipe_step["step_order_text"][$i]["text"],
         ]);
       }
-    };
-    Log::debug("第２ステップ完了");
+    }
+    Log::debug("ステップ３完了");
 
-    $itemsData = [];
-    for ($i = 0; $i < count($request->values["items"]); $i++) {
-      $itemsData[] = Item::create([
-        "article_of_item_id" => $article->id,
-        "name" => $request->values["items"][$i]["name"],
-        "where_to_buy" => $request->values["items"][$i]['place'],
-        "price" => $request->values["items"][$i]['price'],
+    $materialsData = [];
+    for ($i = 0; $i < count($request->materials); $i++) {
+      $materialsData[] = Item::create([
+        "article_of_recipe_id" => $article->id,
+        "name" => $request->materials[$i]["material"],
+        "quantity" => $request->materials[$i]['quantity'],
+        "unit" => $request->materials[$i]['unit'],
       ]);
     }
-    Log::debug("第３ステップ完了");
-
-    $tags = $request->values['tags'];
 
     $tagsData = [];
     $articleTagsData = [];
-    foreach ($tags as $tag) {
+    foreach ($request->tags as $tag) {
       if ($tag !== null) {
         $tag_data = Tag::firstOrCreate(['name' => $tag["tag"]]);
         $tagsData[] = $tag_data;
 
-        $articleTagsData[] = ArticleOfItemTag::create([
-          'article_of_item_id' => $article->id,
+        $articleTagsData[] = ArticleOfItem::create([
+          'article_of_recipe_id' => $article->id,
           'tag_id' => $tag_data->id
         ]);
       }
     }
-    Log::debug("第４ステップ完了");
-
 
     $response = [
       "article" => $article,
-      "reportsData" => $reportsData,
-      "itemsData" => $itemsData,
+      "stepsData" => $stepsData,
+      "materialsData" => $materialsData,
       "tagsData" => $tagsData,
       "articleTagsData" => $articleTagsData
     ];
@@ -154,11 +152,31 @@ class FoodItemController extends Controller
   }
 
   /**
-   * Display the specified resource.
+   * コメント投稿
    */
-  public function show(string $id)
+  public function commentStore(Request $request, string $id)
   {
-    //
+    Log::debug($request);
+    Log::debug($id);
+    // 仮にユーザー１とする
+    $user = User::find(1);
+    $commentData = CommentToItem::create([
+      "article_of_recipe_id" => $id,
+      "user_id" => $user->id,
+      "text" => $request->text
+    ]);
+    Log::debug($commentData);
+
+    $commentWithUserName = [
+      "id" => $commentData->id,
+      "userName" => $user->name,
+      "userIcon" => $user->icon,
+      "text" => $commentData->text,
+      "likes" => $commentData->number_of_likes
+    ];
+    Log::debug($commentWithUserName);
+
+    return response()->json($commentWithUserName);
   }
 
   /**
@@ -172,10 +190,104 @@ class FoodItemController extends Controller
   /**
    * Update the specified resource in storage.
    */
-  public function update(Request $request, string $id)
-  {
-    //
-  }
+  // public function update(Request $request, string $id)
+  // {
+  //   Log::debug($request);
+  //   $article = ArticleOfItem::with('user')->where('id', $id)->first();
+
+  //   $article->title = $request->values["title"];
+  //   $article->thumbnail_path = $request->values["thumbnail"]["thumbnail_path"];
+  //   $article->thumbnail_url = $request->values["thumbnail"]["thumbnail_url"];
+  //   $article->vegan = $request->values["vegeTags"]["vegan"];
+  //   $article->oriental_vegetarian = $request->values["vegeTags"]["oriental_vegetarian"];
+  //   $article->ovo_vegetarian = $request->values["vegeTags"]["ovo_vegetarian"];
+  //   $article->pescatarian = $request->values["vegeTags"]["pescatarian"];
+  //   $article->lacto_vegetarian = $request->values["vegeTags"]["lacto_vegetarian"];
+  //   $article->pollo_vegetarian = $request->values["vegeTags"]["pollo_vegetarian"];
+  //   $article->fruitarian = $request->values["vegeTags"]["fruitarian"];
+  //   $article->other_vegetarian = $request->values["vegeTags"]["other_vegetarian"];
+
+  //   $newMaterials = $request->values["items"];
+  //   $oldMaterials = $article->materials;
+  //   $maxMaterialsNum = max(count($newMaterials), count($oldMaterials));
+  //   $materialsData = [];
+  //   for ($i = 0; $i < $maxMaterialsNum; $i++) {
+  //     if (isset($newMaterials[$i]) && isset($oldMaterials[$i]) && isset($newMaterials[$i]["id"]) && $newMaterials[$i]["id"] === $oldMaterials[$i]["id"]) {
+  //       $oldMaterials[$i]->name = $newMaterials[$i]["name"];
+  //       $oldMaterials[$i]->quantity = $newMaterials[$i]["quantity"];
+  //       $oldMaterials[$i]->unit = $newMaterials[$i]["unit"];
+  //     } else {
+  //       if (isset($newMaterials[$i])) {
+  //         Log::debug("新しい材料あり");
+  //         $materialsData[] = Material::create([
+  //           "article_of_recipe_id" => $article->id,
+  //           "name" => $newMaterials[$i]["name"],
+  //           "quantity" => $newMaterials[$i]['quantity'],
+  //           "unit" => $newMaterials[$i]['unit'],
+  //         ]);
+  //       }
+  //       if (isset($oldMaterials[$i])) {
+  //         $oldMaterials[$i]->delete();
+  //       }
+  //     }
+  //   }
+
+  //   $oldSteps = RecipeStep::where('article_of_recipe_id', $article->id)->get();
+  //   $newSteps = $request->values["recipe_step"];
+  //   $stepsData = [];
+  //   Log::debug($oldSteps);
+
+  //   foreach ($oldSteps as $oldStep) {
+  //     $oldStep->delete();
+  //   }
+
+  //   for ($i = 0; $i < count($request->values["recipe_step"]["step_order_text"]); $i++) {
+  //     if (isset($newSteps["stepImages"][$i]["image_path"])) {
+  //       $stepsData[] = RecipeStep::create([
+  //         "article_of_recipe_id" => $article->id,
+  //         "order" => $newSteps["step_order_text"][$i]["order"],
+  //         "image_path" => $newSteps["stepImages"][$i]["image_path"],
+  //         "image_url" => $newSteps["stepImages"][$i]["image_url"],
+  //         "text" => $newSteps["step_order_text"][$i]["text"],
+  //       ]);
+  //     } else {
+  //       $stepsData[] = RecipeStep::create([
+  //         "article_of_recipe_id" => $article->id,
+  //         "order" => $newSteps["step_order_text"][$i]["order"],
+  //         "image_path" => "",
+  //         "image_url" => "",
+  //         "text" => $newSteps["step_order_text"][$i]["text"],
+  //       ]);
+  //     }
+  //   }
+
+  //   $newTags = $request->values['tags'];
+  //   $tagsData = [];
+  //   $articleTagsData = [];
+  //   $article_tags = ArticleOfRecipeTag::where(['article_of_recipe_id' => $article->id])->get();
+
+  //   if ($article_tags != null) {
+  //     foreach ($article_tags as $article_tag) {
+  //       $article_tag->delete();
+  //     }
+  //   }
+
+  //   foreach ($newTags as $newTag) {
+  //     if ($newTag["name"] !== null) {
+  //       $tag_data = Tag::firstOrCreate(['name' => $newTag["name"]]);
+  //       $tagsData[] = $tag_data;
+
+  //       $articleTagsData[] = ArticleOfRecipeTag::firstOrCreate([
+  //         'article_of_recipe_id' => $article->id,
+  //         'tag_id' => $tag_data->id
+  //       ]);
+  //     }
+  //   }
+
+  //   $article->push();
+
+  //   return response()->json([$article, $stepsData, $tagsData, $articleTagsData]);
+  // }
 
   /**
    * Remove the specified resource from storage.

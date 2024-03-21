@@ -39,8 +39,13 @@ class RecipeController extends Controller
     $vegeTag = $request->type;
 
     if (!$keyword || $keyword == "null") {
-      $articles = ArticleOfRecipe::with('user')->where([$vegeTag => true])->orderBy('updated_at', 'desc')->paginate(20);
-      return response()->json($articles, 200);
+      if ($vegeTag !== "null" || !$vegeTag) {
+        $articles = ArticleOfRecipe::with('user')->where([$vegeTag => true])->orderBy('updated_at', 'desc')->paginate(20);
+        return response()->json($articles, 200);
+      } else {
+        $articles = ArticleOfRecipe::with('user')->where(["vegan" => true])->orderBy('updated_at', 'desc')->paginate(20);
+        return response()->json($articles, 200);
+      }
     } else {
       $searchedArticles = ArticleOfRecipe::orWhereRaw("title &@~ ?", [$keyword])->get();
       $searchedMaterials = Material::orWhereRaw("name &@~ ?", [$keyword])->get();
@@ -90,22 +95,25 @@ class RecipeController extends Controller
    */
   public function store(Request $request)
   {
+    Log::debug($request);
     $vege_types = [];
-    foreach ($request->values['vege_type'] as $type => $value) {
+    foreach ($request->vege_type as $type => $value) {
 
       if ($value) {
-        $vege_types[$type] = 1;
+        $vege_types[$type] = true;
       } else {
-        $vege_types[$type] = 0;
+        $vege_types[$type] = false;
       }
     }
+    Log::debug("ステップ１完了");
 
     $article = ArticleOfRecipe::create([
       "user_id" => 1,
-      "title" => $request->values["title"],
-      "thumbnail" => $request->thumbnailUrl,
-      "cooking_time" => $request->values["time"],
-      "servings" => $request->values["servings"],
+      "title" => $request->title,
+      "thumbnail_path" => $request->thumbnail["thumbnail_path"],
+      "thumbnail_url" => $request->thumbnail["thumbnail_url"],
+      "cooking_time" => $request->cooking_time,
+      "servings" => $request->servings,
       "vegan" => $vege_types['vegan'],
       "oriental_vegetarian" => $vege_types['oriental_vegetarian'],
       "ovo_vegetarian" => $vege_types['ovo_vegetarian'],
@@ -115,32 +123,44 @@ class RecipeController extends Controller
       "fruitarian" => $vege_types['fruitarian'],
       "other_vegetarian" => $vege_types['other_vegetarian'],
     ]);
+    Log::debug("ステップ２完了");
+
 
     $stepsData = [];
-    foreach ($request->values["steps"] as $order => $step) {
-      $stepsData[] = RecipeStep::create([
-        "article_of_recipe_id" => $article->id,
-        "order" => $order + 1,
-        "text" => $step["text"],
-        "image" => $request->stepImageUrls[$order],
-      ]);
-    };
+    for ($i = 0; $i < count($request->recipe_step["step_order_text"]); $i++) {
+      if (isset($request->recipe_step["stepImages"][$i]["image_path"])) {
+        $stepsData[] = RecipeStep::create([
+          "article_of_recipe_id" => $article->id,
+          "order" => $request->recipe_step["step_order_text"][$i]["order"],
+          "image_path" => $request->recipe_step["stepImages"][$i]["image_path"],
+          "image_url" => $request->recipe_step["stepImages"][$i]["image_url"],
+          "text" => $request->recipe_step["step_order_text"][$i]["text"],
+        ]);
+      } else {
+        $stepsData[] = RecipeStep::create([
+          "article_of_recipe_id" => $article->id,
+          "order" => $request->recipe_step["step_order_text"][$i]["order"],
+          "image_path" => "",
+          "image_url" => "",
+          "text" => $request->recipe_step["step_order_text"][$i]["text"],
+        ]);
+      }
+    }
+    Log::debug("ステップ３完了");
 
     $materialsData = [];
-    for ($i = 0; $i < count($request->values["materials"]); $i++) {
+    for ($i = 0; $i < count($request->materials); $i++) {
       $materialsData[] = Material::create([
         "article_of_recipe_id" => $article->id,
-        "name" => $request->values["materials"][$i]["material"],
-        "quantity" => $request->values["materials"][$i]['quantity'],
-        "unit" => $request->values["materials"][$i]['unit'],
+        "name" => $request->materials[$i]["material"],
+        "quantity" => $request->materials[$i]['quantity'],
+        "unit" => $request->materials[$i]['unit'],
       ]);
     }
 
-    $tags = $request->values['tags'];
-
     $tagsData = [];
     $articleTagsData = [];
-    foreach ($tags as $tag) {
+    foreach ($request->tags as $tag) {
       if ($tag !== null) {
         $tag_data = Tag::firstOrCreate(['name' => $tag["tag"]]);
         $tagsData[] = $tag_data;

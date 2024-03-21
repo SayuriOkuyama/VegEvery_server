@@ -30,6 +30,7 @@ Route::prefix('food_items')
     Route::get('/search', 'search')->name('search');
     Route::get('/{id}', 'get')->name('get');
     Route::post('/', 'store')->name('store');
+    Route::post('/{id}/comment', 'commentStore')->name('commentStore');
     Route::put('/{id}', 'update')->name('update');
     Route::delete('/{id}', 'delete')->name('delete');
   });
