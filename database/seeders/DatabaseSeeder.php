@@ -13,8 +13,8 @@ use App\Models\BookshelfArticleOfItem;
 use App\Models\BookshelfArticleOfRecipe;
 use App\Models\CommentToItem;
 use App\Models\CommentToRecipe;
-use App\Models\Favorite;
 use App\Models\Item;
+use App\Models\Like;
 use App\Models\Material;
 use App\Models\Menu;
 use App\Models\RecipeStep;
@@ -22,7 +22,6 @@ use App\Models\Report;
 use App\Models\Review;
 use App\Models\Tag;
 use App\Models\User;
-use Database\Factories\Favorite2Factory;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -43,11 +42,11 @@ class DatabaseSeeder extends Seeder
 
     RecipeStep::factory(300)->recycle($articleOfRecipe)->create();
     Material::factory(300)->recycle($articleOfRecipe)->create();
-    CommentToRecipe::factory(300)->recycle($users)->recycle($articleOfRecipe)->create();
+    $commentToRecipe = CommentToRecipe::factory(300)->recycle($users)->recycle($articleOfRecipe)->create();
 
     Item::factory(300)->recycle($articleOfItem)->create();
     Report::factory(300)->recycle($articleOfItem)->create();
-    CommentToItem::factory(500)->recycle($users)->recycle($articleOfItem)->create();
+    $commentToItem = CommentToItem::factory(500)->recycle($users)->recycle($articleOfItem)->create();
 
     $review = Review::factory(100)->recycle($users)->create();
     Menu::factory(200)->recycle($review)->create();
@@ -55,5 +54,7 @@ class DatabaseSeeder extends Seeder
     Bookshelf::factory(100)->recycle($users)->create();
     BookshelfArticleOfRecipe::factory(50)->create();
     BookshelfArticleOfItem::factory(50)->create();
+
+    Like::factory(1000)->recycle($users)->recycle($articleOfItem)->recycle($articleOfRecipe)->recycle($review)->recycle($commentToRecipe)->recycle($commentToItem)->create();
   }
 }

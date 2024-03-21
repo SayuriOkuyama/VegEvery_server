@@ -37,4 +37,9 @@ class Review extends Model
   {
     return $this->hasMany(Menu::class);
   }
+
+  public function likes()
+  {
+    return $this->morphMany(Like::class, 'likeable');
+  }
 }
