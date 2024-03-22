@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ArticleOfRecipe;
 use App\Models\ArticleOfRecipeTag;
 use App\Models\CommentToRecipe;
+use App\Models\Like;
 use App\Models\Material;
 use App\Models\RecipeStep;
 use App\Models\Tag;
@@ -34,7 +35,6 @@ class RecipeController extends Controller
    */
   public function search(Request $request)
   {
-    Log::debug($request);
     $keyword = $request->search;
     $vegeTag = $request->type;
 
@@ -82,11 +82,13 @@ class RecipeController extends Controller
       ];
     };
 
+    $likes = Like::where('likeable_id', $id)->where('likeable_type', 'ArticleOfRecipe')->get();
+
     $response = [
       "article" => $article,
-      "comments" => $commentsWithUserName
+      "comments" => $commentsWithUserName,
+      "likes" => $likes
     ];
-
     return response()->json($response, 200);
   }
 

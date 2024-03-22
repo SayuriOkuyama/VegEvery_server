@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\FoodItemController;
+use App\Http\Controllers\LikeController;
 use App\Http\Controllers\RecipeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -33,4 +34,11 @@ Route::prefix('food_items')
     Route::post('/{id}/comment', 'commentStore')->name('commentStore');
     Route::put('/{id}', 'update')->name('update');
     Route::delete('/{id}', 'delete')->name('delete');
+  });
+
+Route::prefix('likes')
+  ->name('likes.')
+  ->controller(LikeController::class)
+  ->group(function () {
+    Route::put('/{id}', 'update')->name('update');
   });
