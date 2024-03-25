@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Restaurant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\User;
 
@@ -18,7 +19,6 @@ class ReviewFactory extends Factory
   public function definition(): array
   {
     return [
-      'display_name' => fake()->sentence($nbWords = 2, $variableNbWords = true),
       'star' => fake()->numberBetween($min = 1, $max = 5),
       'thumbnail' => fake()->imageUrl($width = 300, $height = 300),
       'text' => fake()->realText($maxNbChars = 200),
@@ -31,6 +31,7 @@ class ReviewFactory extends Factory
       'pollo_vegetarian' => fake()->randomElement([true, false]),
       'fruitarian' => fake()->randomElement([true, false]),
       'other_vegetarian' => fake()->randomElement([true, false]),
+      'restaurant_id' => fake()->randomElement([1, 2, 3]),
       'user_id' => User::factory()
     ];
   }

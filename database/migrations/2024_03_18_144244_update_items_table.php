@@ -26,5 +26,6 @@ return new class extends Migration
       DB::statement('ALTER TABLE items ALTER COLUMN
           price TYPE integer USING (trim(price))::integer');
     });
+    DB::table('items')->whereRaw('NOT price ~ \'^[0-9]+$\'')->update(['price' => null]);
   }
 };

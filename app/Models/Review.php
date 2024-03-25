@@ -11,7 +11,7 @@ class Review extends Model
 
   protected $fillable = [
     'user_id',
-    'display_name',
+    'restaurant_id',
     'thumbnail_path',
     'thumbnail_url',
     'star',
@@ -33,8 +33,19 @@ class Review extends Model
     return $this->belongsTo(User::class);
   }
 
+
+  public function restaurant()
+  {
+    return $this->belongsTo(Restaurant::class);
+  }
+
   public function menus()
   {
     return $this->hasMany(Menu::class);
+  }
+
+  public function likes()
+  {
+    return $this->morphMany(Like::class, 'likeable');
   }
 }

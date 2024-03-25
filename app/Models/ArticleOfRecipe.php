@@ -56,20 +56,8 @@ class ArticleOfRecipe extends Model
     return $this->belongsToMany(Tag::class);
   }
 
-  public static function search($keyword)
+  public function likes()
   {
-    if (empty($keyword)) {
-      return static::query();
-    }
-
-    // $search_columns = ['title'];
-
-    $search_query = static::query();
-
-    // foreach ($search_columns as $column) {
-    $search_query->orWhereRaw("title &@~ ?", [$keyword]);
-    // }
-
-    return $search_query;
+    return $this->morphMany(Like::class, 'likeable');
   }
 }
