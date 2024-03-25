@@ -11,6 +11,7 @@ use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Models\BookshelfArticleOfItem;
 
 class FoodItemController extends Controller
 {
@@ -316,8 +317,20 @@ class FoodItemController extends Controller
   /**
    * Remove the specified resource from storage.
    */
-  public function destroy(string $id)
+  public function delete(string $id)
   {
-    //
+    Log::debug($id);
+    Report::where("article_of_item_id", $id)->delete();
+    Log::debug("1完了");
+    Item::where("article_of_item_id", $id)->delete();
+    Log::debug("2完了");
+    ArticleOfItemTag::where("article_of_item_id", $id)->delete();
+    Log::debug("3完了");
+    CommentToItem::where("article_of_item_id", $id)->delete();
+    Log::debug("4完了");
+    BookshelfArticleOfItem::where("article_of_item_id", $id)->delete();
+    Log::debug("5完了");
+    ArticleOfItem::find($id)->delete();
+    return response()->json("削除しました");
   }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ArticleOfRecipe;
 use App\Models\ArticleOfRecipeTag;
+use App\Models\BookshelfArticleOfRecipe;
 use App\Models\CommentToRecipe;
 use App\Models\Like;
 use App\Models\Material;
@@ -323,10 +324,22 @@ class RecipeController extends Controller
   }
 
   /**
-   * Remove the specified resource from storage.
+   * 投稿削除
    */
-  public function destroy(string $id)
+  public function delete(string $id)
   {
-    //
+    Log::debug($id);
+    RecipeStep::where("article_of_recipe_id", $id)->delete();
+    Log::debug("1完了");
+    Material::where("article_of_recipe_id", $id)->delete();
+    Log::debug("2完了");
+    ArticleOfRecipeTag::where("article_of_recipe_id", $id)->delete();
+    Log::debug("3完了");
+    CommentToRecipe::where("article_of_recipe_id", $id)->delete();
+    Log::debug("4完了");
+    BookshelfArticleOfRecipe::where("article_of_recipe_id", $id)->delete();
+    Log::debug("5完了");
+    ArticleOfRecipe::find($id)->delete();
+    return response()->json("削除しました");
   }
 }
