@@ -20,6 +20,7 @@ Route::prefix('recipes')
     Route::get('/{id}', 'get')->name('get');
     Route::post('/', 'store')->name('store');
     Route::post('/{id}/comment', 'commentStore')->name('commentStore');
+    Route::delete('/comment', 'commentDelete')->name('commentDelete');
     Route::put('/{id}', 'update')->name('update');
     Route::delete('/{id}', 'delete')->name('delete');
   });
@@ -33,6 +34,7 @@ Route::prefix('food_items')
     Route::get('/{id}', 'get')->name('get');
     Route::post('/', 'store')->name('store');
     Route::post('/{id}/comment', 'commentStore')->name('commentStore');
+    Route::delete('/comment', 'commentDelete')->name('commentDelete');
     Route::put('/{id}', 'update')->name('update');
     Route::delete('/{id}', 'delete')->name('delete');
   });

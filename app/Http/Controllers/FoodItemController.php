@@ -75,6 +75,7 @@ class FoodItemController extends Controller
       $user = User::find($comment->user_id);
       $commentsWithUserName[] = [
         "id" => $comment->id,
+        "user_id" => $comment->user_id,
         "userName" => $user->name,
         "userIcon" => $user->icon,
         "text" => $comment->text,
@@ -331,6 +332,16 @@ class FoodItemController extends Controller
     BookshelfArticleOfItem::where("article_of_item_id", $id)->delete();
     Log::debug("5完了");
     ArticleOfItem::find($id)->delete();
+    return response()->json("削除しました");
+  }
+
+  /**
+   * コメント削除
+   */
+  public function commentDelete(Request $request)
+  {
+    Log::debug($request);
+    CommentToItem::find($request->id)->delete();
     return response()->json("削除しました");
   }
 }

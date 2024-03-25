@@ -76,6 +76,7 @@ class RecipeController extends Controller
       $user = User::find($comment->user_id);
       $commentsWithUserName[] = [
         "id" => $comment->id,
+        "user_id" => $comment->user_id,
         "userName" => $user->name,
         "userIcon" => $user->icon,
         "text" => $comment->text,
@@ -340,6 +341,16 @@ class RecipeController extends Controller
     BookshelfArticleOfRecipe::where("article_of_recipe_id", $id)->delete();
     Log::debug("5完了");
     ArticleOfRecipe::find($id)->delete();
+    return response()->json("削除しました");
+  }
+
+  /**
+   * コメント削除
+   */
+  public function commentDelete(Request $request)
+  {
+    Log::debug($request);
+    CommentToRecipe::find($request->id)->delete();
     return response()->json("削除しました");
   }
 }
