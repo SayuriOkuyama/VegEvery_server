@@ -4,6 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class ArticleOfRecipe extends Model
 {
@@ -31,32 +35,32 @@ class ArticleOfRecipe extends Model
   ];
 
 
-  public function user()
+  public function user(): BelongsTo
   {
     return $this->belongsTo(User::class);
   }
 
-  public function materials()
+  public function materials(): HasMany
   {
     return $this->hasMany(Material::class);
   }
 
-  public function recipeSteps()
+  public function recipeSteps(): HasMany
   {
     return $this->hasMany(RecipeStep::class);
   }
 
-  public function commentsToRecipe()
+  public function commentsToRecipe(): HasMany
   {
     return $this->hasMany(CommentToRecipe::class);
   }
 
-  public function tags()
+  public function tags(): BelongsToMany
   {
     return $this->belongsToMany(Tag::class);
   }
 
-  public function likes()
+  public function likes(): MorphMany
   {
     return $this->morphMany(Like::class, 'likeable');
   }

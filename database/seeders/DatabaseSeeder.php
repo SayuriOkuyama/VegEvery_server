@@ -109,6 +109,7 @@ class DatabaseSeeder extends Seeder
     BookshelfArticleOfRecipe::factory(50)->create();
     BookshelfArticleOfItem::factory(50)->create();
 
-    Like::factory(1000)->recycle($users)->recycle($articleOfItem)->recycle($articleOfRecipe)->recycle($review)->recycle($commentToRecipe)->recycle($commentToItem)->create();
+    Like::factory(1000)->recycle($users)->recycle($articleOfItem)->recycle($articleOfRecipe)
+      ->recycle($review)->recycle($commentToRecipe)->recycle($commentToItem)->create();
   }
 }

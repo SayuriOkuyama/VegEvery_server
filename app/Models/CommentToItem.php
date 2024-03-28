@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class CommentToItem extends Model
 {
@@ -18,17 +20,17 @@ class CommentToItem extends Model
     'text',
   ];
 
-  public function articleOfItem()
+  public function articleOfItem(): BelongsTo
   {
     return $this->belongsTo(ArticleOfItem::class);
   }
 
-  public function user()
+  public function user(): BelongsTo
   {
     return $this->belongsTo(User::class);
   }
 
-  public function likes()
+  public function likes(): MorphMany
   {
     return $this->morphMany(Like::class, 'likeable');
   }

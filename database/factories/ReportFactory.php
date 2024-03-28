@@ -17,13 +17,26 @@ class ReportFactory extends Factory
    */
   public function definition(): array
   {
-    $image_path = fake()->randomElement(["items/report_image/brooke-lark-kXQ3J7_2fpc-unsplash.jpg", "items/report_image/haseeb-jamil-J9lD6FS6_cs-unsplash.jpg", "items/report_image/victoria-shes-4MEL9XS-3JQ-unsplash.jpg"]);
-    if ($image_path === "items/report_image/brooke-lark-kXQ3J7_2fpc-unsplash.jpg") {
-      $image_url = "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object/public/VegEvery-backet/items/report_image/brooke-lark-kXQ3J7_2fpc-unsplash.jpg";
+    $image_path = fake()->randomElement([
+      "items/report_image/brooke-lark-kXQ3J7_2fpc-unsplash.jpg", "
+    items/report_image/haseeb-jamil-J9lD6FS6_cs-unsplash.jpg",
+      "items/report_image/victoria-shes-4MEL9XS-3JQ-unsplash.jpg"
+    ]);
+    if (
+      $image_path ===
+      "items/report_image/brooke-lark-kXQ3J7_2fpc-unsplash.jpg"
+    ) {
+      $image_url =
+        "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object/
+        public/VegEvery-backet/items/report_image/brooke-lark-kXQ3J7_2fpc-unsplash.jpg";
     } elseif ($image_path === "items/report_image/haseeb-jamil-J9lD6FS6_cs-unsplash.jpg") {
-      $image_url = "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object/public/VegEvery-backet/items/report_image/haseeb-jamil-J9lD6FS6_cs-unsplash.jpg";
+      $image_url =
+        "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object/
+        public/VegEvery-backet/items/report_image/haseeb-jamil-J9lD6FS6_cs-unsplash.jpg";
     } else {
-      $image_url = "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object/public/VegEvery-backet/items/report_image/victoria-shes-4MEL9XS-3JQ-unsplash.jpg";
+      $image_url =
+        "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object/
+        public/VegEvery-backet/items/report_image/victoria-shes-4MEL9XS-3JQ-unsplash.jpg";
     }
     return [
       'order' => fake()->unique()->randomNumber(3),

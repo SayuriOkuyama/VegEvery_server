@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Tag extends Model
 {
@@ -13,17 +14,29 @@ class Tag extends Model
     'name',
   ];
 
-  public function articlesOfRecipe()
+  /**
+   *
+   * @return BelongsToMany
+   */
+  public function articlesOfRecipe(): BelongsToMany
   {
     return $this->belongsToMany(ArticleOfRecipe::class);
   }
 
-  public function articlesOfItem()
+  /**
+   *
+   * @return BelongsToMany
+   */
+  public function articlesOfItem(): BelongsToMany
   {
     return $this->belongsToMany(ArticleOfItem::class);
   }
 
-  public function reviews()
+  /**
+   *
+   * @return BelongsToMany
+   */
+  public function reviews(): BelongsToMany
   {
     return $this->belongsToMany(Review::class);
   }
