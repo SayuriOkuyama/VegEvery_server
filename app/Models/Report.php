@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Report extends Model
 {
@@ -17,30 +18,13 @@ class Report extends Model
     'text',
   ];
 
-  public function articlesOfItem()
+  public function articlesOfItem(): BelongsTo
   {
     return $this->belongsTo(ArticleOfItem::class);
   }
 
-  public function articlesOfRecipe()
+  public function articlesOfRecipe(): BelongsTo
   {
     return $this->belongsTo(ArticleOfRecipe::class);
-  }
-
-  public static function search($keyword)
-  {
-    if (empty($keyword)) {
-      return static::query();
-    }
-
-    $search_columns = ['text'];
-
-    $search_query = static::query();
-
-    foreach ($search_columns as $column) {
-      $search_query->orWhereRaw("$column &@~ ?", [$keyword]);
-    }
-
-    return $search_query;
   }
 }

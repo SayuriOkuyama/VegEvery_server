@@ -31,7 +31,16 @@ class UserFactory extends Factory
       // 'remember_token' => Str::random(10),
       'secret_question' => fake()->realText(10),
       'answer_to_secret_question' => fake()->realText(10),
-      'vegetarian_type' => fake()->randomElement(['vegan', 'oriental_vegetarian', 'ovo_vegetarian', 'pescatarian', 'lacto_vegetarian', 'pollo_vegetarian', 'fruitarian', 'other_vegetarian']),
+      'vegetarian_type' => fake()->randomElement([
+        'vegan',
+        'oriental_vegetarian',
+        'ovo_vegetarian',
+        'pescatarian',
+        'lacto_vegetarian',
+        'pollo_vegetarian',
+        'fruitarian',
+        'other_vegetarian'
+      ]),
       'icon' => fake()->imageUrl($width = 30, $height = 30)
     ];
   }

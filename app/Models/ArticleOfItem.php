@@ -4,6 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class ArticleOfItem extends Model
 {
@@ -27,32 +31,32 @@ class ArticleOfItem extends Model
     'other_vegetarian',
   ];
 
-  public function user()
+  public function user(): BelongsTo
   {
     return $this->belongsTo(User::class);
   }
 
-  public function items()
+  public function items(): HasMany
   {
     return $this->hasMany(Item::class);
   }
 
-  public function reports()
+  public function reports(): HasMany
   {
     return $this->hasMany(Report::class);
   }
 
-  public function commentsToItem()
+  public function commentsToItem(): HasMany
   {
     return $this->hasMany(CommentToItem::class);
   }
 
-  public function tags()
+  public function tags(): BelongsToMany
   {
     return $this->belongsToMany(Tag::class);
   }
 
-  public function likes()
+  public function likes(): MorphMany
   {
     return $this->morphMany(Like::class, 'likeable');
   }

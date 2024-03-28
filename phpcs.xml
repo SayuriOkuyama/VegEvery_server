@@ -14,7 +14,13 @@
   <arg value="sp"/>
 
   <!-- 適用規約 -->
-  <rule ref="PSR12"/>
+  <rule ref="PSR12">
+    <!-- インデント 4 を除外 -->
+    <exclude name="Generic.WhiteSpace.ScopeIndent.IncorrectExact"/>
+    <exclude name="Generic.WhiteSpace.ScopeIndent.Incorrect"/>
+    <exclude name="PSR2.Methods.FunctionCallSignature.Indent"/>
+    <exclude name="PSR12.ControlStructures.ControlStructureSpacing.LineIndent"/>
+  </rule>
 
   <exclude-pattern>/bootstrap/</exclude-pattern>
   <exclude-pattern>/node_modules/</exclude-pattern>

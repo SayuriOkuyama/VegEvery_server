@@ -41,25 +41,34 @@ class RecipeController extends Controller
 
     if (!$keyword || $keyword == "null") {
       if ($vegeTag !== "null" || !$vegeTag) {
-        $articles = ArticleOfRecipe::with('user')->where([$vegeTag => true])->orderBy('updated_at', 'desc')->paginate(20);
+        $articles = ArticleOfRecipe::with('user')->where([$vegeTag => true])
+          ->orderBy('updated_at', 'desc')->paginate(20);
         return response()->json($articles, 200);
       } else {
-        $articles = ArticleOfRecipe::with('user')->where(["vegan" => true])->orderBy('updated_at', 'desc')->paginate(20);
+        $articles = ArticleOfRecipe::with('user')->where(["vegan" => true])
+          ->orderBy('updated_at', 'desc')->paginate(20);
         return response()->json($articles, 200);
       }
     } else {
       $searchedArticles = ArticleOfRecipe::orWhereRaw("title &@~ ?", [$keyword])->get();
       $searchedMaterials = Material::orWhereRaw("name &@~ ?", [$keyword])->get();
       $searchedSteps = RecipeStep::orWhereRaw("text &@~ ?", [$keyword])->get();
-      $searchedTags = Tag::orWhereRaw("name &@~ ?", [$keyword])->with("articlesOfRecipe")->get();
+      $searchedTags = Tag::orWhereRaw("name &@~ ?", [$keyword])
+        ->with("articlesOfRecipe")->get();
 
       $articleIds = $searchedArticles->pluck('id')->toArray();
       $articleIdsFromMaterials = $searchedMaterials->pluck('article_id')->toArray();
       $articleIdsFromSteps = $searchedSteps->pluck('article_id')->toArray();
       $articleIdsFromTags = $searchedTags->pluck('id')->toArray();
 
-      $uniqueIds = array_unique(array_merge($articleIds, $articleIdsFromMaterials, $articleIdsFromSteps, $articleIdsFromTags));
-      $uniqueSearchedArticles = ArticleOfRecipe::with('user')->whereIn('id', $uniqueIds)->where([$vegeTag => true])->orderBy('updated_at', 'desc')->paginate(20);
+      $uniqueIds = array_unique(array_merge(
+        $articleIds,
+        $articleIdsFromMaterials,
+        $articleIdsFromSteps,
+        $articleIdsFromTags
+      ));
+      $uniqueSearchedArticles = ArticleOfRecipe::with('user')->whereIn('id', $uniqueIds)
+        ->where([$vegeTag => true])->orderBy('updated_at', 'desc')->paginate(20);
       return response()->json($uniqueSearchedArticles, 200);
     }
   }
@@ -69,7 +78,13 @@ class RecipeController extends Controller
    */
   public function get(string $id)
   {
-    $article = ArticleOfRecipe::with('user', 'materials', 'recipeSteps', 'commentsToRecipe', 'tags')->where('id', $id)->first();
+    $article = ArticleOfRecipe::with(
+      'user',
+      'materials',
+      'recipeSteps',
+      'commentsToRecipe',
+      'tags'
+    )->where('id', $id)->first();
 
     $commentsWithUserName = [];
     foreach ($article->commentsToRecipe as $comment) {
@@ -242,7 +257,10 @@ class RecipeController extends Controller
     $maxMaterialsNum = max(count($newMaterials), count($oldMaterials));
     $materialsData = [];
     for ($i = 0; $i < $maxMaterialsNum; $i++) {
-      if (isset($newMaterials[$i]) && isset($oldMaterials[$i]) && isset($newMaterials[$i]["id"]) && $newMaterials[$i]["id"] === $oldMaterials[$i]["id"]) {
+      if (
+        isset($newMaterials[$i]) && isset($oldMaterials[$i]) && isset($newMaterials[$i]["id"])
+        && $newMaterials[$i]["id"] === $oldMaterials[$i]["id"]
+      ) {
         $oldMaterials[$i]->name = $newMaterials[$i]["name"];
         $oldMaterials[$i]->quantity = $newMaterials[$i]["quantity"];
         $oldMaterials[$i]->unit = $newMaterials[$i]["unit"];

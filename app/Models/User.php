@@ -4,13 +4,16 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-  use HasApiTokens, HasFactory, Notifiable;
+  use HasApiTokens;
+  use HasFactory;
+  use Notifiable;
 
   /**
    * The attributes that are mass assignable.
@@ -40,17 +43,18 @@ class User extends Authenticatable
    * The attributes that should be cast.
    *
    * @var array<string, string>
+   * @return HasMany
    */
   protected $casts = [
     'password' => 'hashed',
   ];
 
-  public function articlesOfRecipe()
+  public function articlesOfRecipe(): HasMany
   {
     return $this->hasMany(ArticleOfRecipe::class);
   }
 
-  public function articlesOfItem()
+  public function articlesOfItem(): HasMany
   {
     return $this->hasMany(ArticleOfItem::class);
   }

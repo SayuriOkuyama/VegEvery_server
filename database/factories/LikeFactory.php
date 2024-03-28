@@ -22,7 +22,13 @@ class LikeFactory extends Factory
    */
   public function definition(): array
   {
-    $likeable_type = $this->faker->randomElement(['ArticleOfRecipe', 'ArticleOfItem', 'Review', 'CommentToRecipe', 'CommentToItem']);
+    $likeable_type = $this->faker->randomElement([
+      'ArticleOfRecipe',
+      'ArticleOfItem',
+      'Review',
+      'CommentToRecipe',
+      'CommentToItem'
+    ]);
     $likeable_id = null;
 
     if ($likeable_type === "ArticleOfRecipe") {

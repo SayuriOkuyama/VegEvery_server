@@ -60,8 +60,14 @@ class FoodItemController extends Controller
       $articleIdsFromReports = $searchedReports->pluck('article_id')->toArray();
       $articleIdsFromTags = $searchedTags->pluck('id')->toArray();
 
-      $uniqueIds = array_unique(array_merge($articleIds, $articleIdsFromItems, $articleIdsFromReports, $articleIdsFromTags));
-      $uniqueSearchedArticles = ArticleOfItem::with('user')->whereIn('id', $uniqueIds)->where([$vegeTag => true])->orderBy('updated_at', 'desc')->paginate(20);
+      $uniqueIds = array_unique(array_merge(
+        $articleIds,
+        $articleIdsFromItems,
+        $articleIdsFromReports,
+        $articleIdsFromTags
+      ));
+      $uniqueSearchedArticles = ArticleOfItem::with('user')->whereIn('id', $uniqueIds)
+        ->where([$vegeTag => true])->orderBy('updated_at', 'desc')->paginate(20);
       return response()->json($uniqueSearchedArticles, 200);
     }
   }
@@ -279,7 +285,10 @@ class FoodItemController extends Controller
     $maxItemsNum = max(count($newItems), count($oldItems));
     $itemsData = [];
     for ($i = 0; $i < $maxItemsNum; $i++) {
-      if (isset($newItems[$i]) && isset($oldItems[$i]) && isset($newItems[$i]["id"]) && $newItems[$i]["id"] === $oldItems[$i]["id"]) {
+      if (
+        isset($newItems[$i]) && isset($oldItems[$i]) && isset($newItems[$i]["id"])
+        && $newItems[$i]["id"] === $oldItems[$i]["id"]
+      ) {
         $oldItems[$i]->name = $newItems[$i]["name"];
         $oldItems[$i]->where_to_buy = $newItems[$i]["where_to_buy"];
         $oldItems[$i]->price = $newItems[$i]["price"];
