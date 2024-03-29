@@ -15,10 +15,10 @@ services:
       - './docker/8.3/php.ini:/usr/local/etc/php/php.ini'
       - './docker/8.3/000-default.conf:/etc/apache2/sites-available/000-default.conf'
       - './docker/8.3/000-default.conf:/etc/apache2/sites-enabled/000-default.conf'
-    command: >
-      sh -c "composer install && apache2ctl -D BACKGROUND"
+    # command: >
+    #   sh -c "composer install && apache2ctl start"
     networks:
-      - vegevery
+      - vegenet
 networks:
-  vegevery:
+  vegenet:
     driver: bridge
