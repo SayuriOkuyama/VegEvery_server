@@ -4,6 +4,7 @@ use App\Http\Controllers\FoodItemController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\MapController;
 use App\Http\Controllers\RecipeController;
+use App\Http\Controllers\SocialController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -58,3 +59,8 @@ Route::prefix('maps')
     Route::put('/{id}', 'update')->name('update');
     Route::delete('/{id}', 'delete')->name('delete');
   });
+
+Route::group(['middleware' => ['session']], function () {
+  Route::get('login/{provider}', [SocialController::class, 'redirect']);
+  Route::get('login/{provider}/callback', [SocialController::class, 'callback']);
+});
