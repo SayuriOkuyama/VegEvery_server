@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Log;
 
 class SocialController extends Controller
 {
+
+
   public function redirect(OAuthProviderEnum $provider)
   {
     return Socialite::driver($provider->value)->redirect()->getTargetUrl();
@@ -33,7 +35,7 @@ class SocialController extends Controller
       Auth::login($user);
 
       $response = [
-        "message" => "noRegistered",
+        "message" => "login",
         "user" => $user
       ];
     } else {

@@ -21,16 +21,18 @@ class User extends Authenticatable
    * @var array<int, string>
    */
   protected $fillable = [
+    'account_id',
     'name',
     'password',
     'secret_question',
     'answer_to_secret_question',
     'vegetarian_type',
-    'icon',
+    'icon_url',
+    'icon_storage_path',
   ];
 
   /**
-   * The attributes that should be hidden for serialization.
+   * JSONに変換するときに結果に含まれないようにしたいカラム
    *
    * @var array<int, string>
    */
@@ -40,13 +42,14 @@ class User extends Authenticatable
   ];
 
   /**
-   * The attributes that should be cast.
+   * 自動的にハッシュ化する
    *
    * @var array<string, string>
    * @return HasMany
    */
   protected $casts = [
     'password' => 'hashed',
+    'answer_to_secret_question',
   ];
 
   public function articlesOfRecipe(): HasMany

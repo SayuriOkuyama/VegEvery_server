@@ -15,7 +15,9 @@ return [
 
   'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
     '%s%s%s',
-    'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
+    'localhost,localhost:8000,localhost:3001,192.168.3.21,192.168.3.21:3001,192.168.3.21:8000,127.0.0.1,127.0.0.1:8000,127.0.0.1:3001,::1',
+    'SANCTUM_STATEFUL_DOMAINS',
+    '192.168.3.21:3001',
     env('APP_URL') ? ',' . parse_url(env('APP_URL'), PHP_URL_HOST) : '',
     env('FRONTEND_URL') ? ',' . parse_url(env('FRONTEND_URL'), PHP_URL_HOST) : ''
   ))),
@@ -36,16 +38,14 @@ return [
 
   /*
     |--------------------------------------------------------------------------
-    | Expiration Minutes
+    | 有効期限（分）
     |--------------------------------------------------------------------------
-    |
-    | This value controls the number of minutes until an issued token will be
-    | considered expired. This will override any values set in the token's
-    | "expires_at" attribute, but first-party sessions are not affected.
-    |
+    | この値は、発行されたトークンが期限切れとみなされるまでの分数を制御します。
+    | これにより、トークンの「expires_at」属性に設定された値がオーバーライドされますが
+    | ファーストパーティのセッションは影響を受けません。
     */
 
-  'expiration' => null,
+  'expiration' => 120,
 
   /*
     |--------------------------------------------------------------------------

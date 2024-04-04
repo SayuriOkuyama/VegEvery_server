@@ -38,7 +38,9 @@ class RecipeController extends Controller
   {
     $keyword = $request->search;
     $vegeTag = $request->type;
-
+    Log::debug($request);
+    Log::debug($keyword);
+    Log::debug($vegeTag);
     if (!$keyword || $keyword == "null") {
       if ($vegeTag !== "null" || !$vegeTag) {
         $articles = ArticleOfRecipe::with('user')->where([$vegeTag => true])
