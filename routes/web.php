@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,3 +19,12 @@ Route::get('/', function () {
 });
 
 require __DIR__ . '/auth.php';
+
+// Route::prefix('api/user')
+//   ->name('user.')
+//   ->controller(AuthController::class)
+//   ->middleware(['auth:sanctum'])
+//   ->group(function () {
+//     Route::get('/', 'index')->name('index');
+//     Route::get('/logout', 'search')->name('search');
+//   });

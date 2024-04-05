@@ -33,15 +33,31 @@ class Kernel extends HttpKernel
       \App\Http\Middleware\EncryptCookies::class,
       \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
       \Illuminate\Session\Middleware\StartSession::class,
+      // セッションからエラーメッセージを取得し、ビューに共有するためのミドルウェア
       \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+      // CSRF トークンの検証を行うためのミドルウェア
+      // フォームリクエストが信頼できるものであることを確認
       \App\Http\Middleware\VerifyCsrfToken::class,
+      // ルートモデルバインディングを処理するためのミドルウェア
       \Illuminate\Routing\Middleware\SubstituteBindings::class,
     ],
 
     'api' => [
+      // フロントエンドリクエストがセッション情報を持っていることを確認するためのミドルウェア
       \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+      // API ルートへのリクエストのスロットルを設定するためのミドルウェア
+      // APIへのリクエストが過剰になることを防ぎ、サーバーの負荷を軽減
       \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
       \Illuminate\Routing\Middleware\SubstituteBindings::class,
+    ],
+
+    'session' => [
+      // クッキーの内容を暗号化するためのミドルウェア
+      \App\Http\Middleware\EncryptCookies::class,
+      // クッキーをレスポンスに追加するためのミドルウェア
+      \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+      // セッションを開始し、セッションIDをクライアントに送信するためのミドルウェア
+      \Illuminate\Session\Middleware\StartSession::class,
     ],
   ];
 

@@ -23,12 +23,41 @@ class UserFactory extends Factory
    */
   public function definition(): array
   {
+    $icon_storage_path = fake()->randomElement(
+      [
+        "users/icon/IMG_3223.PNG",
+        "users/icon/outside.jpeg",
+        "users/icon/tabitha-turner-qtr0Lw4fMGc-unsplash.jpg",
+        "users/icon/user_icon.png",
+      ]
+    );
+    if ($icon_storage_path === "users/icon/IMG_3223.PNG") {
+      $icon_url
+        = "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object" .
+        "/public/VegEvery-backet/users/icon/IMG_3223.PNG";
+    } elseif ($icon_storage_path === "users/icon/outside.jpeg") {
+      $icon_url =
+        "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object" .
+        "/public/VegEvery-backet/users/icon/outside.jpeg";
+    } elseif ($icon_storage_path === "users/icon/user_icon.png") {
+      $icon_url =
+        "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object" .
+        "/public/VegEvery-backet/users/icon/user_icon.png";
+    } else {
+      $icon_url =
+        "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object" .
+        "/public/VegEvery-backet/users/icon/tabitha-turner-qtr0Lw4fMGc-unsplash.jpg";
+    }
+
+    $faker = \Faker\Factory::create();
+
+    // 一意な15文字の英数字の文字列を生成
+    $uniqueString = $faker->unique()->regexify('[A-Za-z0-9]{15}');
+
     return [
+      "account_id" => $uniqueString,
       'name' => fake()->name(),
-      // 'email' => fake()->unique()->safeEmail(),
-      // 'email_verified_at' => now(),
       'password' => static::$password ??= Hash::make('password'),
-      // 'remember_token' => Str::random(10),
       'secret_question' => fake()->realText(10),
       'answer_to_secret_question' => fake()->realText(10),
       'vegetarian_type' => fake()->randomElement([
@@ -41,7 +70,8 @@ class UserFactory extends Factory
         'fruitarian',
         'other_vegetarian'
       ]),
-      'icon' => fake()->imageUrl($width = 30, $height = 30)
+      'icon_url' => $icon_url,
+      "icon_storage_path" => $icon_storage_path
     ];
   }
 

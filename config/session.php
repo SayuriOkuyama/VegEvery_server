@@ -9,12 +9,11 @@ return [
     | Default Session Driver
     |--------------------------------------------------------------------------
     |
-    | This option controls the default session "driver" that will be used on
-    | requests. By default, we will use the lightweight native driver but
-    | you may specify any of the other wonderful drivers provided here.
-    |
-    | Supported: "file", "cookie", "database", "apc",
-    |            "memcached", "redis", "dynamodb", "array"
+    | このオプションは、リクエストで使用されるデフォルトのセッション「ドライバー」を制御します。
+    | デフォルトでは、軽量のネイティブ ドライバーを使用しますが、
+    | ここで提供されている他の優れたドライバーを指定することもできます。
+    | サポートされている: 「ファイル」、「クッキー」、「データベース」、「
+    | apc」、「memcached」、「redis」、「dynamodb」、「array」
     |
     */
 
@@ -107,9 +106,11 @@ return [
     | Session Sweeping Lottery
     |--------------------------------------------------------------------------
     |
-    | Some session drivers must manually sweep their storage location to get
-    | rid of old sessions from storage. Here are the chances that it will
-    | happen on a given request. By default, the odds are 2 out of 100.
+    | このオプションは、リクエストで使用されるデフォルトのセッション「ドライバー」を制御します。
+    | デフォルトでは、軽量のネイティブドライバーを使用しますが、
+    | 古いセッションはストレージから削除されます。
+    | 特定のリクエストでそれが発生する可能性は次のとおりです。
+    | デフォルトでは、確率は 100 分の 2 です。
     |
     */
 
@@ -120,9 +121,9 @@ return [
     | Session Cookie Name
     |--------------------------------------------------------------------------
     |
-    | Here you may change the name of the cookie used to identify a session
-    | instance by ID. The name specified here will get used every time a
-    | new session cookie is created by the framework for every driver.
+    | ここで、セッション インスタンスを ID で識別するために使用される Cookie の名前を変更できます。
+    | ここで指定した名前は、すべてのドライバーのフレームワークによって
+    | 新しいセッション Cookie が作成されるたびに使用されます。
     |
     */
 
@@ -136,9 +137,8 @@ return [
     | Session Cookie Path
     |--------------------------------------------------------------------------
     |
-    | The session cookie path determines the path for which the cookie will
-    | be regarded as available. Typically, this will be the root path of
-    | your application but you are free to change this when necessary.
+    | セッション Cookie のパスによって、Cookie が使用可能であると見なされるパスが決まります。
+    | 通常、これはアプリケーションのルート パスになりますが、必要に応じて自由に変更できます。
     |
     */
 
@@ -149,9 +149,10 @@ return [
     | Session Cookie Domain
     |--------------------------------------------------------------------------
     |
-    | Here you may change the domain of the cookie used to identify a session
-    | in your application. This will determine which domains the cookie is
-    | available to in your application. A sensible default has been set.
+    | ここで、アプリケーション内のセッションを識別するために使用される
+    | Cookie のドメインを変更できます。
+    | これにより、アプリケーション内で Cookie を使用できるドメインが決まります。
+    | 適切なデフォルトが設定されています。
     |
     */
 
@@ -162,9 +163,9 @@ return [
     | HTTPS Only Cookies
     |--------------------------------------------------------------------------
     |
-    | By setting this option to true, session cookies will only be sent back
-    | to the server if the browser has a HTTPS connection. This will keep
-    | the cookie from being sent to you when it can't be done securely.
+    | このオプションを true に設定すると、ブラウザーに HTTPS 接続がある場合にのみ、
+    | セッション Cookie がサーバーに送り返されます。
+    | これにより、安全に送信できない場合に Cookie が送信されなくなります。
     |
     */
 
@@ -175,9 +176,9 @@ return [
     | HTTP Access Only
     |--------------------------------------------------------------------------
     |
-    | Setting this value to true will prevent JavaScript from accessing the
-    | value of the cookie and the cookie will only be accessible through
-    | the HTTP protocol. You are free to modify this option if needed.
+    | この値を true に設定すると、JavaScript が Cookie の値にアクセスできなくなり、
+    | Cookie には HTTP プロトコル経由でのみアクセスできるようになります。
+    | 必要に応じて、このオプションを自由に変更できます。
     |
     */
 
@@ -203,10 +204,9 @@ return [
     | Partitioned Cookies
     |--------------------------------------------------------------------------
     |
-    | Setting this value to true will tie the cookie to the top-level site for
-    | a cross-site context. Partitioned cookies are accepted by the browser
-    | when flagged "secure" and the Same-Site attribute is set to "none".
-    |
+    | この値を true に設定すると、Cookie がクロスサイト コンテキストのトップレベル サイトに関連付けられます。
+    | 「セキュア」フラグが設定され、Same-Site 属性が「none」に設定されている場合、
+    | ブラウザーはパーティション化された Cookie を受け入れます。
     */
 
   'partitioned' => false,

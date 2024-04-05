@@ -35,6 +35,8 @@ class FoodItemController extends Controller
    */
   public function search(Request $request)
   {
+    Log::debug("search");
+
     Log::debug($request);
     $keyword = $request->search;
     $vegeTag = $request->type;
