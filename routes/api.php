@@ -67,16 +67,6 @@ Route::prefix('maps')
     Route::delete('/{id}', 'delete')->name('delete');
   });
 
-// Route::group(['middleware' => ['session']], function () {
-//   Route::get('register', [AuthController::class, 'register']);
-//   Route::get('auth/{provider}', [AuthController::class, 'redirect']);
-//   Route::get('auth/{provider}/callback', [AuthController::class, 'callback']);
-// });
-// Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-//   Log::debug($request->user());
-//   // return $request->user();
-// });
-
 Route::prefix('user')
   ->name('user.')
   ->controller(AuthController::class)
@@ -91,25 +81,6 @@ Route::prefix('user')
     Route::middleware(['auth:sanctum'])
       ->group(function () {
         Route::get('/', 'index')->name('index');
-        Route::get('/logout', 'search')->name('search');
+        Route::post('/logout', 'logout')->name('logout');
       });
   });
-// Route::group(['middleware' => ['session']], function () {
-//   Route::get('user/register', [AuthController::class, 'register']);
-//   Route::get('user/auth/{provider}', [AuthController::class, 'redirect']);
-//   Route::get('user/auth/{provider}/callback', [AuthController::class, 'callback']);
-// });
-
-// Route::prefix('user')
-//   ->middleware(['auth:sanctum'])
-//   ->name('user.')
-//   ->controller(AuthController::class)
-//   ->group(function () {
-//     Route::get('/', 'index')->name('index');
-//     Route::get('/search', 'search')->name('search');
-//     Route::get('/{id}', 'get')->name('get');
-//     Route::post('/', 'store')->name('store');
-//     Route::post('/{id}/comment', 'commentStore')->name('commentStore');
-//     Route::put('/{id}', 'update')->name('update');
-//     Route::delete('/{id}', 'delete')->name('delete');
-//   });

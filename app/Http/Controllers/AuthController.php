@@ -56,7 +56,7 @@ class AuthController extends Controller
 
     Log::debug($user);
     // Laravel Sanctumのトークンを発行
-    $token = $user->createToken('my-app-token')->plainTextToken;
+    $token = $user->createToken('sanctum_token')->plainTextToken;
 
     return response()->json(['token' => $token, "user" => $user], 200);
   }
@@ -75,7 +75,7 @@ class AuthController extends Controller
       $user = User::find($social_account->user_id);
 
       // Laravel Sanctumのトークンを発行
-      $token = $user->createToken('my-app-token')->plainTextToken;
+      $token = $user->createToken('sanctum_token')->plainTextToken;
 
       return response()->json(['token' => $token, "user" => $user], 200);
 
@@ -95,7 +95,7 @@ class AuthController extends Controller
         ], 401);
       }
 
-      $token = $user->createToken('auth-token')->plainTextToken;
+      $token = $user->createToken('sanctum_token')->plainTextToken;
 
       return response()->json(['token' => $token, 'user' => $user], 200);
     }
