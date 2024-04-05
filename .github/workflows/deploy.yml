@@ -13,14 +13,10 @@ jobs:
       REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
       REMOTE_USER: ${{ secrets.REMOTE_USER }}
     steps:
-    - uses: actions/checkout@v4
+    # - uses: actions/checkout@v4
 
-    - name: Set up PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.1'extensions: mbstring, xml
-        coverage: none
-
+    # - name: Set up PHP
+    #   uses: shivammathur/setup-php@v2
     # - name: Install dependencies
     #   run: composer install --prefer-dist --no-progress --no-suggest
 
