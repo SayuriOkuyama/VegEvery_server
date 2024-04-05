@@ -13,19 +13,15 @@ jobs:
       REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
       REMOTE_USER: ${{ secrets.REMOTE_USER }}
     steps:
-    - name: Deploy to Amazon EC2
-      uses: easingthemes/ssh-deploy@v5.0.2
+      - uses: easingthemes/ssh-deploy@v5.0.2
 
-      - name: Pull GitHub image and update dependencies
+      - name: Pull GitHub image and install dependencies
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key
           chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key $REMOTE_USER@$REMOTE_HOST << 'EOF'
             cd VegEvery_server
-            # sudo docker compose down
             git pull origin master
-            # sudo docker compose up -d --build
             sudo docker compose exec laravel /bin/bash
             composer install
-            # php artisan migrate --force
           EOF
