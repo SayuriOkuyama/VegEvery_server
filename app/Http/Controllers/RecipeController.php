@@ -128,7 +128,7 @@ class RecipeController extends Controller
     Log::debug("ステップ１完了");
 
     $article = ArticleOfRecipe::create([
-      "user_id" => 1,
+      "user_id" => $request->user_id,
       "title" => $request->title,
       "thumbnail_path" => $request->thumbnail["thumbnail_path"],
       "thumbnail_url" => $request->thumbnail["thumbnail_url"],
@@ -172,7 +172,7 @@ class RecipeController extends Controller
     for ($i = 0; $i < count($request->materials); $i++) {
       $materialsData[] = Material::create([
         "article_of_recipe_id" => $article->id,
-        "name" => $request->materials[$i]["material"],
+        "name" => $request->materials[$i]["name"],
         "quantity" => $request->materials[$i]['quantity'],
         "unit" => $request->materials[$i]['unit'],
       ]);
@@ -180,9 +180,10 @@ class RecipeController extends Controller
 
     $tagsData = [];
     $articleTagsData = [];
+    Log::debug($request->tags);
     foreach ($request->tags as $tag) {
       if ($tag !== null) {
-        $tag_data = Tag::firstOrCreate(['name' => $tag["tag"]]);
+        $tag_data = Tag::firstOrCreate(['name' => $tag]);
         $tagsData[] = $tag_data;
 
         $articleTagsData[] = ArticleOfRecipeTag::create([
