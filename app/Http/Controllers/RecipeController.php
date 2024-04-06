@@ -95,7 +95,7 @@ class RecipeController extends Controller
         "id" => $comment->id,
         "user_id" => $comment->user_id,
         "userName" => $user->name,
-        "userIcon" => $user->icon,
+        "userIcon" => $user->icon_url,
         "text" => $comment->text,
         "likes" => $comment->number_of_likes
       ];
@@ -211,8 +211,8 @@ class RecipeController extends Controller
   {
     Log::debug($request);
     Log::debug($id);
-    // 仮にユーザー１とする
-    $user = User::find(1);
+
+    $user = User::find($request->user_id);
     $commentData = CommentToRecipe::create([
       "article_of_recipe_id" => $id,
       "user_id" => $user->id,
@@ -223,9 +223,9 @@ class RecipeController extends Controller
     $commentWithUserName = [
       "id" => $commentData->id,
       "userName" => $user->name,
-      "userIcon" => $user->icon,
+      "userIcon" => $user->icon_url,
       "text" => $commentData->text,
-      "likes" => $commentData->number_of_likes
+      "likes" => 0
     ];
     Log::debug($commentWithUserName);
 

@@ -74,6 +74,9 @@ class FoodItemController extends Controller
     }
   }
 
+  /**
+   * 個別記事検索
+   */
   public function get(string $id)
   {
     $article = ArticleOfItem::with('user', 'items', 'reports', 'commentsToItem', 'tags')->where('id', $id)->first();
@@ -85,7 +88,7 @@ class FoodItemController extends Controller
         "id" => $comment->id,
         "user_id" => $comment->user_id,
         "userName" => $user->name,
-        "userIcon" => $user->icon,
+        "userIcon" => $user->icon_url,
         "text" => $comment->text,
         "likes" => $comment->number_of_likes
       ];
@@ -107,18 +110,18 @@ class FoodItemController extends Controller
     Log::debug($request);
 
     $article = ArticleOfItem::create([
-      "user_id" => 1,
+      "user_id" => $request->user_id,
       "title" => $request->title,
       "thumbnail_path" => $request->thumbnail["thumbnail_path"],
       "thumbnail_url" => $request->thumbnail["thumbnail_url"],
-      "vegan" => $request->vegeTags['vegan'],
-      "oriental_vegetarian" => $request->vegeTags['oriental_vegetarian'],
-      "ovo_vegetarian" => $request->vegeTags['ovo_vegetarian'],
-      "pescatarian" => $request->vegeTags['pescatarian'],
-      "lacto_vegetarian" => $request->vegeTags['lacto_vegetarian'],
-      "pollo_vegetarian" => $request->vegeTags['pollo_vegetarian'],
-      "fruitarian" => $request->vegeTags['fruitarian'],
-      "other_vegetarian" => $request->vegeTags['other_vegetarian'],
+      "vegan" => $request->vege_type['vegan'],
+      "oriental_vegetarian" => $request->vege_type['oriental_vegetarian'],
+      "ovo_vegetarian" => $request->vege_type['ovo_vegetarian'],
+      "pescatarian" => $request->vege_type['pescatarian'],
+      "lacto_vegetarian" => $request->vege_type['lacto_vegetarian'],
+      "pollo_vegetarian" => $request->vege_type['pollo_vegetarian'],
+      "fruitarian" => $request->vege_type['fruitarian'],
+      "other_vegetarian" => $request->vege_type['other_vegetarian'],
     ]);
 
     $reportsData = [];
@@ -155,15 +158,17 @@ class FoodItemController extends Controller
 
     $tagsData = [];
     $articleTagsData = [];
-    foreach ($request->tags as $tag) {
-      if ($tag !== null) {
-        $tag_data = Tag::firstOrCreate(['name' => $tag["tag"]]);
-        $tagsData[] = $tag_data;
+    if ($request->tags) {
+      foreach ($request->tags as $tag) {
+        if ($tag !== null) {
+          $tag_data = Tag::firstOrCreate(['name' => $tag["tag"]]);
+          $tagsData[] = $tag_data;
 
-        $articleTagsData[] = ArticleOfItemTag::create([
-          'article_of_item_id' => $article->id,
-          'tag_id' => $tag_data->id
-        ]);
+          $articleTagsData[] = ArticleOfItemTag::create([
+            'article_of_item_id' => $article->id,
+            'tag_id' => $tag_data->id
+          ]);
+        }
       }
     }
 
@@ -185,8 +190,8 @@ class FoodItemController extends Controller
   {
     Log::debug($request);
     Log::debug($id);
-    // 仮にユーザー１とする
-    $user = User::find(1);
+
+    $user = User::find($request->user_id);
     $commentData = CommentToItem::create([
       "article_of_item_id" => $id,
       "user_id" => $user->id,
@@ -197,9 +202,9 @@ class FoodItemController extends Controller
     $commentWithUserName = [
       "id" => $commentData->id,
       "userName" => $user->name,
-      "userIcon" => $user->icon,
+      "userIcon" => $user->icon_url,
       "text" => $commentData->text,
-      "likes" => $commentData->number_of_likes
+      "likes" => 0
     ];
     Log::debug($commentWithUserName);
 
@@ -217,14 +222,14 @@ class FoodItemController extends Controller
     $article->title = $request->title;
     $article->thumbnail_path = $request->thumbnail["thumbnail_path"];
     $article->thumbnail_url = $request->thumbnail["thumbnail_url"];
-    $article->vegan = $request->vegeTags["vegan"];
-    $article->oriental_vegetarian = $request->vegeTags["oriental_vegetarian"];
-    $article->ovo_vegetarian = $request->vegeTags["ovo_vegetarian"];
-    $article->pescatarian = $request->vegeTags["pescatarian"];
-    $article->lacto_vegetarian = $request->vegeTags["lacto_vegetarian"];
-    $article->pollo_vegetarian = $request->vegeTags["pollo_vegetarian"];
-    $article->fruitarian = $request->vegeTags["fruitarian"];
-    $article->other_vegetarian = $request->vegeTags["other_vegetarian"];
+    $article->vegan = $request->vege_type["vegan"];
+    $article->oriental_vegetarian = $request->vege_type["oriental_vegetarian"];
+    $article->ovo_vegetarian = $request->vege_type["ovo_vegetarian"];
+    $article->pescatarian = $request->vege_type["pescatarian"];
+    $article->lacto_vegetarian = $request->vege_type["lacto_vegetarian"];
+    $article->pollo_vegetarian = $request->vege_type["pollo_vegetarian"];
+    $article->fruitarian = $request->vege_type["fruitarian"];
+    $article->other_vegetarian = $request->vege_type["other_vegetarian"];
 
     $oldReports = Report::where('article_of_item_id', $article->id)->get();
     $newReports = $request->reports;
@@ -264,15 +269,17 @@ class FoodItemController extends Controller
       }
     }
 
-    foreach ($request->tags as $newTag) {
-      if ($newTag["name"] !== null) {
-        $tag_data = Tag::firstOrCreate(['name' => $newTag["name"]]);
-        $tagsData[] = $tag_data;
+    if ($request->tags) {
+      foreach ($request->tags as $newTag) {
+        if ($newTag !== null) {
+          $tag_data = Tag::firstOrCreate(['name' => $newTag]);
+          $tagsData[] = $tag_data;
 
-        $articleTagsData[] = ArticleOfItemTag::firstOrCreate([
-          'article_of_item_id' => $article->id,
-          'tag_id' => $tag_data->id
-        ]);
+          $articleTagsData[] = ArticleOfItemTag::firstOrCreate([
+            'article_of_item_id' => $article->id,
+            'tag_id' => $tag_data->id
+          ]);
+        }
       }
     }
 
