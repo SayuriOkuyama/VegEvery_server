@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Models\BookshelfArticleOfItem;
+use App\Models\Like;
 
 class FoodItemController extends Controller
 {
@@ -94,9 +95,12 @@ class FoodItemController extends Controller
       ];
     };
 
+    $likes = Like::where('likeable_id', $id)->where('likeable_type', 'ArticleOfItem')->get();
+
     $response = [
       "article" => $article,
-      "comments" => $commentsWithUserName
+      "comments" => $commentsWithUserName,
+      "likes" => $likes
     ];
 
     return response()->json($response, 200);
