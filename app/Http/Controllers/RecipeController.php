@@ -95,7 +95,7 @@ class RecipeController extends Controller
         "id" => $comment->id,
         "user_id" => $comment->user_id,
         "userName" => $user->name,
-        "userIcon" => $user->icon,
+        "userIcon" => $user->icon_url,
         "text" => $comment->text,
         "likes" => $comment->number_of_likes
       ];
@@ -128,7 +128,7 @@ class RecipeController extends Controller
     Log::debug("ステップ１完了");
 
     $article = ArticleOfRecipe::create([
-      "user_id" => 1,
+      "user_id" => $request->user_id,
       "title" => $request->title,
       "thumbnail_path" => $request->thumbnail["thumbnail_path"],
       "thumbnail_url" => $request->thumbnail["thumbnail_url"],
@@ -172,7 +172,7 @@ class RecipeController extends Controller
     for ($i = 0; $i < count($request->materials); $i++) {
       $materialsData[] = Material::create([
         "article_of_recipe_id" => $article->id,
-        "name" => $request->materials[$i]["material"],
+        "name" => $request->materials[$i]["name"],
         "quantity" => $request->materials[$i]['quantity'],
         "unit" => $request->materials[$i]['unit'],
       ]);
@@ -180,9 +180,10 @@ class RecipeController extends Controller
 
     $tagsData = [];
     $articleTagsData = [];
+    Log::debug($request->tags);
     foreach ($request->tags as $tag) {
       if ($tag !== null) {
-        $tag_data = Tag::firstOrCreate(['name' => $tag["tag"]]);
+        $tag_data = Tag::firstOrCreate(['name' => $tag]);
         $tagsData[] = $tag_data;
 
         $articleTagsData[] = ArticleOfRecipeTag::create([
@@ -210,8 +211,8 @@ class RecipeController extends Controller
   {
     Log::debug($request);
     Log::debug($id);
-    // 仮にユーザー１とする
-    $user = User::find(1);
+
+    $user = User::find($request->user_id);
     $commentData = CommentToRecipe::create([
       "article_of_recipe_id" => $id,
       "user_id" => $user->id,
@@ -222,9 +223,9 @@ class RecipeController extends Controller
     $commentWithUserName = [
       "id" => $commentData->id,
       "userName" => $user->name,
-      "userIcon" => $user->icon,
+      "userIcon" => $user->icon_url,
       "text" => $commentData->text,
-      "likes" => $commentData->number_of_likes
+      "likes" => 0
     ];
     Log::debug($commentWithUserName);
 
@@ -244,18 +245,23 @@ class RecipeController extends Controller
     $article->servings = $request->servings;
     $article->thumbnail_path = $request->thumbnail["thumbnail_path"];
     $article->thumbnail_url = $request->thumbnail["thumbnail_url"];
-    $article->vegan = $request->vegeTags["vegan"];
-    $article->oriental_vegetarian = $request->vegeTags["oriental_vegetarian"];
-    $article->ovo_vegetarian = $request->vegeTags["ovo_vegetarian"];
-    $article->pescatarian = $request->vegeTags["pescatarian"];
-    $article->lacto_vegetarian = $request->vegeTags["lacto_vegetarian"];
-    $article->pollo_vegetarian = $request->vegeTags["pollo_vegetarian"];
-    $article->fruitarian = $request->vegeTags["fruitarian"];
-    $article->other_vegetarian = $request->vegeTags["other_vegetarian"];
+    $article->vegan = $request->vege_type["vegan"];
+    $article->oriental_vegetarian = $request->vege_type["oriental_vegetarian"];
+    $article->ovo_vegetarian = $request->vege_type["ovo_vegetarian"];
+    $article->pescatarian = $request->vege_type["pescatarian"];
+    $article->lacto_vegetarian = $request->vege_type["lacto_vegetarian"];
+    $article->pollo_vegetarian = $request->vege_type["pollo_vegetarian"];
+    $article->fruitarian = $request->vege_type["fruitarian"];
+    $article->other_vegetarian = $request->vege_type["other_vegetarian"];
     $article->push();
-
+    Log::debug("第一ステップ完了");
     $newMaterials = $request->materials;
     $oldMaterials = $article->materials;
+
+    Log::debug("↓oldMaterials");
+    Log::debug($oldMaterials);
+    Log::debug("↓newMaterials");
+    Log::debug($newMaterials);
     $maxMaterialsNum = max(count($newMaterials), count($oldMaterials));
     $materialsData = [];
     for ($i = 0; $i < $maxMaterialsNum; $i++) {
@@ -281,35 +287,44 @@ class RecipeController extends Controller
         }
       }
     }
+    Log::debug("第２ステップ完了");
+
 
     $oldSteps = RecipeStep::where('article_of_recipe_id', $article->id)->get();
     $newSteps = $request->recipe_step;
     $stepsData = [];
+    Log::debug("↓oldSteps");
     Log::debug($oldSteps);
+    Log::debug("↓newSteps");
+    Log::debug($newSteps);
 
     foreach ($oldSteps as $oldStep) {
       $oldStep->delete();
     }
+    Log::debug("ここからnewSteps");
 
-    for ($i = 0; $i < count($newSteps["step_order_text"]); $i++) {
-      if (isset($newSteps["stepImages"][$i]["image_path"])) {
-        $stepsData[] = RecipeStep::create([
-          "article_of_recipe_id" => $article->id,
-          "order" => $newSteps["step_order_text"][$i]["order"],
-          "image_path" => $newSteps["stepImages"][$i]["image_path"],
-          "image_url" => $newSteps["stepImages"][$i]["image_url"],
-          "text" => $newSteps["step_order_text"][$i]["text"],
-        ]);
-      } else {
-        $stepsData[] = RecipeStep::create([
-          "article_of_recipe_id" => $article->id,
-          "order" => $newSteps["step_order_text"][$i]["order"],
-          "image_path" => "",
-          "image_url" => "",
-          "text" => $newSteps["step_order_text"][$i]["text"],
-        ]);
+    if ($newSteps) {
+      for ($i = 0; $i < count($newSteps["step_order_text"]); $i++) {
+        if (isset($newSteps["stepImages"][$i]["image_path"])) {
+          $stepsData[] = RecipeStep::create([
+            "article_of_recipe_id" => $article->id,
+            "order" => $newSteps["step_order_text"][$i]["order"],
+            "image_path" => $newSteps["stepImages"][$i]["image_path"],
+            "image_url" => $newSteps["stepImages"][$i]["image_url"],
+            "text" => $newSteps["step_order_text"][$i]["text"],
+          ]);
+        } else {
+          $stepsData[] = RecipeStep::create([
+            "article_of_recipe_id" => $article->id,
+            "order" => $newSteps["step_order_text"][$i]["order"],
+            "image_path" => "",
+            "image_url" => "",
+            "text" => $newSteps["step_order_text"][$i]["text"],
+          ]);
+        }
       }
     }
+    Log::debug("第3ステップ完了");
 
     $tagsData = [];
     $articleTagsData = [];
@@ -321,17 +336,21 @@ class RecipeController extends Controller
       }
     }
 
-    foreach ($request->tags as $newTag) {
-      if ($newTag["name"] !== null) {
-        $tag_data = Tag::firstOrCreate(['name' => $newTag["name"]]);
-        $tagsData[] = $tag_data;
+    if ($request->tags) {
+      foreach ($request->tags as $newTag) {
+        if ($newTag !== null) {
+          $tag_data = Tag::firstOrCreate(['name' => $newTag]);
+          $tagsData[] = $tag_data;
 
-        $articleTagsData[] = ArticleOfRecipeTag::firstOrCreate([
-          'article_of_recipe_id' => $article->id,
-          'tag_id' => $tag_data->id
-        ]);
+          $articleTagsData[] = ArticleOfRecipeTag::firstOrCreate([
+            'article_of_recipe_id' => $article->id,
+            'tag_id' => $tag_data->id
+          ]);
+        }
       }
     }
+    Log::debug("第4ステップ完了");
+
 
     $response = [
       "article" => $article,
