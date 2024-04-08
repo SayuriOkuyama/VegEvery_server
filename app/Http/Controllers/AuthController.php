@@ -33,6 +33,7 @@ class AuthController extends Controller
       $path = "user/icon_image/user_icon.png";
       $url = $request->iconUrl;
     } else {
+      // provider 情報から修正がない場合
       $path = "";
       $url = $request->iconUrl;
     }
