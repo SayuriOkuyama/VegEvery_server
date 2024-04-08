@@ -15,6 +15,7 @@
     "laravel/sanctum": "^3.3",
     "laravel/socialite": "^5.12",
     "laravel/tinker": "^2.8",
+    "league/flysystem-aws-s3-v3": "^3.0",
     "rafaelwendel/phpsupabase": "^0.0.7",
     "socialiteproviders/google": "^4.1"
   },

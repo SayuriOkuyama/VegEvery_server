@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Str;
 
@@ -22,6 +23,20 @@ class AuthController extends Controller
 
   public function register(Request $request)
   {
+    Log::debug("Auth-register");
+    Log::debug($request);
+
+    if ($request->iconFile) {
+      $path = Storage::putFile('recipes/thumbnail', $request->file('iconFile'));
+      $url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
+    } else if ($request->iconUrl === 'https://static.vegevery.my-raga-bhakti.com/user/icon_image/user_icon.png') {
+      $path = "user/icon_image/user_icon.png";
+      $url = $request->iconUrl;
+    } else {
+      $path = "";
+      $url = $request->iconUrl;
+    }
+
     if ($request->provider) {
       // ランダムな文字列を生成し、テーブルに存在する場合は作り直す
       do {
@@ -31,9 +46,9 @@ class AuthController extends Controller
       $user = User::create([
         "account_id" => $randomString,
         'name' => $request->name,
-        'vegetarian_type' => $request->vegetarian_type,
-        'icon_url' => $request->icon["url"],
-        'icon_storage_path' => $request->icon["storage_path"],
+        'vegetarian_type' => $request->vegeType,
+        'icon_url' => $url,
+        'icon_storage_path' => $path
       ]);
 
       SocialAccount::create([
@@ -46,11 +61,11 @@ class AuthController extends Controller
         "account_id" => $request->account_id,
         'name' => $request->name,
         'password' => $request->password,
-        'secret_question' => $request->secret_question,
-        'answer_to_secret_question' => $request->answer_to_secret_question,
-        'vegetarian_type' => $request->vegetarian_type,
-        'icon_url' => $request->icon["url"],
-        'icon_storage_path' => $request->icon["storage_path"],
+        'secret_question' => $request->secretQuestion,
+        'answer_to_secret_question' => $request->secretAnswer,
+        'vegetarian_type' => $request->vegeType,
+        'icon_url' => $url,
+        'icon_storage_path' => $path
       ]);
     }
 
@@ -63,6 +78,7 @@ class AuthController extends Controller
 
   public function login(Request $request)
   {
+    Log::debug("Auth-login");
     Log::debug($request);
 
     // social ログインの場合
@@ -96,7 +112,7 @@ class AuthController extends Controller
       }
 
       $token = $user->createToken('sanctum_token')->plainTextToken;
-
+      Log::debug(['token' => $token, 'user' => $user]);
       return response()->json(['token' => $token, 'user' => $user], 200);
     }
   }

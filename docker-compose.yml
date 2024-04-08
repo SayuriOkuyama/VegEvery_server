@@ -1,4 +1,20 @@
 services:
+  database:
+    image: postgres
+    container_name: database
+    restart: unless-stopped
+    environment:
+      DB_CONNECTION: '${DB_CONNECTION}'
+      POSTGRES_DB: '${DB_DATABASE}'
+      POSTGRES_USER: '${DB_USERNAME}'
+      POSTGRES_PASSWORD: '${DB_PASSWORD}'
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - vegenet
+
   laravel:
     build:
       context: .
@@ -12,11 +28,17 @@ services:
       XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
     volumes:
       - '.:/var/www/html'
+      - 'pgsql-vegevery:/var/lib/postgresql/data'
       - './docker/8.3/php.ini:/usr/local/etc/php/php.ini'
       - './docker/8.3/000-default.conf:/etc/apache2/sites-available/000-default.conf'
       - './docker/8.3/000-default.conf:/etc/apache2/sites-enabled/000-default.conf'
     networks:
       - vegenet
+    depends_on:
+      - database
 networks:
   vegenet:
     driver: bridge
+volumes:
+  pgsql-vegevery:
+    driver: local
