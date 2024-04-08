@@ -12,7 +12,9 @@ use App\Models\RecipeStep;
 use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class RecipeController extends Controller
 {
@@ -117,73 +119,75 @@ class RecipeController extends Controller
   public function store(Request $request)
   {
     Log::debug($request);
-    $vege_types = [];
-    foreach ($request->vege_type as $type => $value) {
-      if ($value) {
-        $vege_types[$type] = true;
-      } else {
-        $vege_types[$type] = false;
-      }
-    }
-    Log::debug("ステップ１完了");
+
+    $path = Storage::putFile('recipes/thumbnail', $request->file('thumbnail'));
+    Log::debug($path);
+
+    $url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
+    Log::debug($url);
 
     $article = ArticleOfRecipe::create([
-      "user_id" => $request->user_id,
+      "user_id" => Auth::id(),
       "title" => $request->title,
-      "thumbnail_path" => $request->thumbnail["thumbnail_path"],
-      "thumbnail_url" => $request->thumbnail["thumbnail_url"],
-      "cooking_time" => $request->cooking_time,
+      "thumbnail_path" => $path,
+      "thumbnail_url" => $url,
+      "cooking_time" => $request->time,
       "servings" => $request->servings,
-      "vegan" => $vege_types['vegan'],
-      "oriental_vegetarian" => $vege_types['oriental_vegetarian'],
-      "ovo_vegetarian" => $vege_types['ovo_vegetarian'],
-      "pescatarian" => $vege_types['pescatarian'],
-      "lacto_vegetarian" => $vege_types['lacto_vegetarian'],
-      "pollo_vegetarian" => $vege_types['pollo_vegetarian'],
-      "fruitarian" => $vege_types['fruitarian'],
-      "other_vegetarian" => $vege_types['other_vegetarian'],
+      "vegan" => $request->vegan,
+      "oriental_vegetarian" => $request->oriental_vegetarian,
+      "ovo_vegetarian" => $request->oriental_vegetarian,
+      "pescatarian" => $request->pescatarian,
+      "lacto_vegetarian" => $request->lacto_vegetarian,
+      "pollo_vegetarian" => $request->pollo_vegetarian,
+      "fruitarian" => $request->fruitarian,
+      "other_vegetarian" => $request->other_vegetarian,
     ]);
     Log::debug("ステップ２完了");
 
-
     $stepsData = [];
-    for ($i = 0; $i < count($request->recipe_step["step_order_text"]); $i++) {
-      if (isset($request->recipe_step["stepImages"][$i]["image_path"])) {
-        $stepsData[] = RecipeStep::create([
-          "article_of_recipe_id" => $article->id,
-          "order" => $request->recipe_step["step_order_text"][$i]["order"],
-          "image_path" => $request->recipe_step["stepImages"][$i]["image_path"],
-          "image_url" => $request->recipe_step["stepImages"][$i]["image_url"],
-          "text" => $request->recipe_step["step_order_text"][$i]["text"],
-        ]);
+
+    for ($i = 0; $i < count($request->steps); $i++) {
+      Log::debug($request->steps[$i]);
+
+      if (isset($request->steps[$i]["image"])) {
+        Log::debug($request->file('steps.' . $i . '.image'));
+
+        $path = Storage::putFile('recipes/step_images', $request->file('steps.' . $i . '.image'));
+        $url =  "https://static.vegevery.my-raga-bhakti.com/" . $path;
       } else {
-        $stepsData[] = RecipeStep::create([
-          "article_of_recipe_id" => $article->id,
-          "order" => $request->recipe_step["step_order_text"][$i]["order"],
-          "image_path" => "",
-          "image_url" => "",
-          "text" => $request->recipe_step["step_order_text"][$i]["text"],
-        ]);
+        $path = "";
+        $url = "";
       }
+      $stepsData[] = RecipeStep::create([
+        "article_of_recipe_id" => $article->id,
+        "order" => $request->steps[$i]["order"],
+        "image_path" => $path,
+        "image_url" => $url,
+        "text" => $request->steps[$i]["text"],
+      ]);
     }
     Log::debug("ステップ３完了");
 
     $materialsData = [];
-    for ($i = 0; $i < count($request->materials); $i++) {
+    foreach ($request->materials as $material) {
       $materialsData[] = Material::create([
         "article_of_recipe_id" => $article->id,
-        "name" => $request->materials[$i]["name"],
-        "quantity" => $request->materials[$i]['quantity'],
-        "unit" => $request->materials[$i]['unit'],
+        "name" => $material["name"],
+        "quantity" => $material['quantity'],
+        "unit" => $material['unit'],
       ]);
     }
+
+    Log::debug("ステップ４完了");
 
     $tagsData = [];
     $articleTagsData = [];
     Log::debug($request->tags);
     foreach ($request->tags as $tag) {
-      if ($tag !== null) {
-        $tag_data = Tag::firstOrCreate(['name' => $tag]);
+      Log::debug($tag["name"]);
+      if ($tag["name"] !== "") {
+
+        $tag_data = Tag::firstOrCreate(['name' => $tag["name"]]);
         $tagsData[] = $tag_data;
 
         $articleTagsData[] = ArticleOfRecipeTag::create([
@@ -291,7 +295,7 @@ class RecipeController extends Controller
 
 
     $oldSteps = RecipeStep::where('article_of_recipe_id', $article->id)->get();
-    $newSteps = $request->recipe_step;
+    $newSteps = $request->steps;
     $stepsData = [];
     Log::debug("↓oldSteps");
     Log::debug($oldSteps);
@@ -304,14 +308,14 @@ class RecipeController extends Controller
     Log::debug("ここからnewSteps");
 
     if ($newSteps) {
-      for ($i = 0; $i < count($newSteps["step_order_text"]); $i++) {
-        if (isset($newSteps["stepImages"][$i]["image_path"])) {
+      for ($i = 0; $i < count($newSteps); $i++) {
+        if (isset($newSteps[$i]["image"])) {
           $stepsData[] = RecipeStep::create([
             "article_of_recipe_id" => $article->id,
-            "order" => $newSteps["step_order_text"][$i]["order"],
-            "image_path" => $newSteps["stepImages"][$i]["image_path"],
-            "image_url" => $newSteps["stepImages"][$i]["image_url"],
-            "text" => $newSteps["step_order_text"][$i]["text"],
+            "order" => $newSteps[$i]["order"],
+            "image_path" => $newSteps[$i]["image_path"],
+            "image_url" => $newSteps[$i]["image_url"],
+            "text" => $newSteps[$i]["text"],
           ]);
         } else {
           $stepsData[] = RecipeStep::create([

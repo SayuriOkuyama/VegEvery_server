@@ -4,7 +4,7 @@ WORKDIR /var/www/html
 
 RUN apt-get update \
     && apt-get install -y nodejs npm libonig-dev libzip-dev libpq-dev unzip mariadb-client postgresql-client  git vim\
-    && docker-php-ext-install mbstring zip bcmath pdo_mysql pdo_pgsql mysqli \
+    && docker-php-ext-install mbstring zip bcmath pgsql pdo_pgsql \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug \
     && curl -sLS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer \
