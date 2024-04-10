@@ -17,26 +17,14 @@ class ArticleOfRecipeFactory extends Factory
    */
   public function definition(): array
   {
-    $thumbnail_path = fake()->randomElement(
-      [
-        "recipes/thumbnail/brooke-lark-kXQ3J7_2fpc-unsplash.jpg",
-        "recipes/thumbnail/haseeb-jamil-J9lD6FS6_cs-unsplash.jpg",
-        "recipes/thumbnail/victoria-shes-4MEL9XS-3JQ-unsplash.jpg"
-      ]
-    );
-    if ($thumbnail_path === "recipes/thumbnail/brooke-lark-kXQ3J7_2fpc-unsplash.jpg") {
-      $thumbnail_url
-        = "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object/" .
-        "public/VegEvery-backet/recipes/thumbnail/brooke-lark-kXQ3J7_2fpc-unsplash.jpg";
-    } elseif ($thumbnail_path === "recipes/thumbnail/haseeb-jamil-J9lD6FS6_cs-unsplash.jpg") {
-      $thumbnail_url =
-        "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object/" .
-        "public/VegEvery-backet/recipes/thumbnail/haseeb-jamil-J9lD6FS6_cs-unsplash.jpg";
-    } else {
-      $thumbnail_url =
-        "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object/" .
-        "public/VegEvery-backet/recipes/thumbnail/victoria-shes-4MEL9XS-3JQ-unsplash.jpg";
-    }
+    $thumbnail_path = fake()->randomElement([
+      "recipes/thumbnail/brooke-lark-kXQ3J7_2fpc-unsplash.jpg",
+      "recipes/thumbnail/haseeb-jamil-J9lD6FS6_cs-unsplash.jpg",
+      "recipes/thumbnail/victoria-shes-4MEL9XS-3JQ-unsplash.jpg"
+    ]);
+
+    $thumbnail_url = "https://static.vegevery.my-raga-bhakti.com/" . $thumbnail_path;
+
 
     return [
       'title' => fake()->realText($maxNbChars = 20),

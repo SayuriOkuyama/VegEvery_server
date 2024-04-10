@@ -5,9 +5,7 @@ use App\Http\Controllers\FoodItemController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\MapController;
 use App\Http\Controllers\RecipeController;
-use App\Http\Controllers\SocialController;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('recipes')
@@ -75,6 +73,7 @@ Route::prefix('user')
       ->group(function () {
         Route::post('/login', 'login')->name('login');
         Route::post('/register', 'register')->name('register');
+        Route::post('/check_account_id', 'checkAccountId')->name('checkAccountId');
         Route::get('auth/{provider}', 'redirect')->name('redirect');
         Route::get('auth/{provider}/callback', 'callback')->name('callback');
       });
