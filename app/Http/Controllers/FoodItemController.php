@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Models\BookshelfArticleOfItem;
 use App\Models\Like;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class FoodItemController extends Controller
 {
@@ -112,69 +114,76 @@ class FoodItemController extends Controller
   public function store(Request $request)
   {
     Log::debug($request);
+    $path = Storage::putFile('items/thumbnail', $request->file('thumbnail'));
+    Log::debug($path);
+
+    $url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
+    Log::debug($url);
+
 
     $article = ArticleOfItem::create([
-      "user_id" => $request->user_id,
+      "user_id" => Auth::id(),
       "title" => $request->title,
-      "thumbnail_path" => $request->thumbnail["thumbnail_path"],
-      "thumbnail_url" => $request->thumbnail["thumbnail_url"],
-      "vegan" => $request->vege_type['vegan'],
-      "oriental_vegetarian" => $request->vege_type['oriental_vegetarian'],
-      "ovo_vegetarian" => $request->vege_type['ovo_vegetarian'],
-      "pescatarian" => $request->vege_type['pescatarian'],
-      "lacto_vegetarian" => $request->vege_type['lacto_vegetarian'],
-      "pollo_vegetarian" => $request->vege_type['pollo_vegetarian'],
-      "fruitarian" => $request->vege_type['fruitarian'],
-      "other_vegetarian" => $request->vege_type['other_vegetarian'],
+      "thumbnail_path" => $path,
+      "thumbnail_url" => $url,
+      "vegan" => $request->vegan === "true" ? true : false,
+      "oriental_vegetarian" => $request->oriental_vegetarian === "true" ? true : false,
+      "ovo_vegetarian" => $request->ovo_vegetarian === "true" ? true : false,
+      "pescatarian" => $request->pescatarian === "true" ? true : false,
+      "lacto_vegetarian" => $request->lacto_vegetarian === "true" ? true : false,
+      "pollo_vegetarian" => $request->pollo_vegetarian === "true" ? true : false,
+      "fruitarian" => $request->fruitarian === "true" ? true : false,
+      "other_vegetarian" => $request->other_vegetarian === "true" ? true : false,
     ]);
+    Log::debug("ステップ２完了");
 
     $reportsData = [];
-    for ($i = 0; $i < count($request->reports["reports_order_text"]); $i++) {
-      if (isset($request->reports["reportImages"][$i]["image_path"])) {
-        $reportsData[] = Report::create([
-          "article_of_item_id" => $article->id,
-          "order" => $request->reports["reports_order_text"][$i]["order"],
-          "image_path" => $request->reports["reportImages"][$i]["image_path"],
-          "image_url" => $request->reports["reportImages"][$i]["image_url"],
-          "text" => $request->reports["reports_order_text"][$i]["text"],
-        ]);
-      } else {
-        $reportsData[] = Report::create([
-          "article_of_item_id" => $article->id,
-          "order" => $request->reports["reports_order_text"][$i]["order"],
-          "image_path" => "",
-          "image_url" => "",
-          "text" => $request->reports["reports_order_text"][$i]["text"],
-        ]);
+    for ($i = 0; $i < count($request->reports); $i++) {
+      $path = "";
+      $url = "";
+      if (isset($request->reports[$i]["image"])) {
+        $path = Storage::putFile('items/report_images', $request->file('reports.' . $i . '.image'));
+        $url =  "https://static.vegevery.my-raga-bhakti.com/" . $path;
       }
-    }
-
-    $itemsData = [];
-    for ($i = 0; $i < count($request->items); $i++) {
-      $itemsData[] = Item::create([
+      $reportsData[] = Report::create([
         "article_of_item_id" => $article->id,
-        "name" => $request->items[$i]["name"],
-        "where_to_buy" => $request->items[$i]['place'],
-        "price" => $request->items[$i]['price'],
+        "order" => $request->reports[$i]["order"],
+        "image_path" => $path,
+        "image_url" => $url,
+        "text" => $request->reports[$i]["text"],
       ]);
     }
+    Log::debug("ステップ３完了");
+
+    $itemsData = [];
+    foreach ($request->items as $item) {
+      $itemsData[] = Item::create([
+        "article_of_item_id" => $article->id,
+        "name" => $item["name"],
+        "where_to_buy" => $item['where_to_buy'],
+        "price" => $item['price'],
+      ]);
+    }
+    Log::debug("ステップ４完了");
     Log::debug($itemsData);
 
     $tagsData = [];
     $articleTagsData = [];
-    if ($request->tags) {
-      foreach ($request->tags as $tag) {
-        if ($tag !== null) {
-          $tag_data = Tag::firstOrCreate(['name' => $tag["tag"]]);
-          $tagsData[] = $tag_data;
+    Log::debug($request->tags);
+    foreach ($request->tags as $tag) {
+      Log::debug($tag["name"]);
+      if ($tag["name"] !== "") {
 
-          $articleTagsData[] = ArticleOfItemTag::create([
-            'article_of_item_id' => $article->id,
-            'tag_id' => $tag_data->id
-          ]);
-        }
+        $tag_data = Tag::firstOrCreate(['name' => $tag["name"]]);
+        $tagsData[] = $tag_data;
+
+        $articleTagsData[] = ArticleOfItemTag::create([
+          'article_of_item_id' => $article->id,
+          'tag_id' => $tag_data->id
+        ]);
       }
     }
+    Log::debug("ステップ5完了");
 
     $response = [
       "article" => $article,
@@ -223,45 +232,62 @@ class FoodItemController extends Controller
     Log::debug($request);
     $article = ArticleOfItem::with('user', "items")->where('id', $id)->first();
 
+    $path = "";
+    $url = "";
+
+    if ($request->thumbnail_path === "") {
+      $path = Storage::putFile('items/thumbnail', $request->file('thumbnail_newFile'));
+      $url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
+    } else {
+      $path = $request->thumbnail_path;
+      $url = $request->thumbnail_url;
+    }
+
+
     $article->title = $request->title;
-    $article->thumbnail_path = $request->thumbnail["thumbnail_path"];
-    $article->thumbnail_url = $request->thumbnail["thumbnail_url"];
-    $article->vegan = $request->vege_type["vegan"];
-    $article->oriental_vegetarian = $request->vege_type["oriental_vegetarian"];
-    $article->ovo_vegetarian = $request->vege_type["ovo_vegetarian"];
-    $article->pescatarian = $request->vege_type["pescatarian"];
-    $article->lacto_vegetarian = $request->vege_type["lacto_vegetarian"];
-    $article->pollo_vegetarian = $request->vege_type["pollo_vegetarian"];
-    $article->fruitarian = $request->vege_type["fruitarian"];
-    $article->other_vegetarian = $request->vege_type["other_vegetarian"];
+    $article->thumbnail_path = $path;
+    $article->thumbnail_url = $url;
+    $article->vegan = $request->vegan === "true" ? true : false;
+    $article->oriental_vegetarian = $request->oriental_vegetarian === "true" ? true : false;
+    $article->ovo_vegetarian = $request->ovo_vegetarian === "true" ? true : false;
+    $article->pescatarian = $request->pescatarian === "true" ? true : false;
+    $article->lacto_vegetarian = $request->lacto_vegetarian === "true" ? true : false;
+    $article->pollo_vegetarian = $request->pollo_vegetarian === "true" ? true : false;
+    $article->fruitarian = $request->fruitarian === "true" ? true : false;
+    $article->other_vegetarian = $request->other_vegetarian === "true" ? true : false;
+    $article->push();
+    Log::debug("第一ステップ完了");
 
     $oldReports = Report::where('article_of_item_id', $article->id)->get();
-    $newReports = $request->reports;
     $reportsData = [];
 
     foreach ($oldReports as $oldReport) {
       $oldReport->delete();
     }
 
-    for ($i = 0; $i < count($request->reports["report_order_text"]); $i++) {
-      if (isset($newReports["reportImages"][$i]["image_path"])) {
-        $reportsData[] = Report::create([
-          "article_of_item_id" => $article->id,
-          "order" => $newReports["report_order_text"][$i]["order"],
-          "image_path" => $newReports["reportImages"][$i]["image_path"],
-          "image_url" => $newReports["reportImages"][$i]["image_url"],
-          "text" => $newReports["report_order_text"][$i]["text"],
-        ]);
+    $reportsData = [];
+    for ($i = 0; $i < count($request->reports); $i++) {
+      $path = "";
+      $url = "";
+      if (isset($request->reports[$i]["file"])) {
+        $path = Storage::putFile('items/report_images', $request->file('reports.' . $i . '.file'));
+        $url =  "https://static.vegevery.my-raga-bhakti.com/" . $path;
+      } elseif (!isset($request->reports[$i]["file"]) && $request->reports[$i]["url"] === "") {
+        $path = "";
+        $url = "";
       } else {
-        $reportsData[] = Report::create([
-          "article_of_item_id" => $article->id,
-          "order" => $newReports["report_order_text"][$i]["order"],
-          "image_path" => "",
-          "image_url" => "",
-          "text" => $newReports["report_order_text"][$i]["text"],
-        ]);
+        $path = $request->reports[$i]["path"];
+        $url = $request->reports[$i]["url"];
       }
+      $reportsData[] = Report::create([
+        "article_of_item_id" => $article->id,
+        "order" => $request->reports[$i]["order"],
+        "image_path" => $path,
+        "image_url" => $url,
+        "text" => $request->reports[$i]["text"],
+      ]);
     }
+    Log::debug("ステップ2完了");
 
     $tagsData = [];
     $articleTagsData = [];
@@ -272,11 +298,12 @@ class FoodItemController extends Controller
         $article_tag->delete();
       }
     }
+    Log::debug("ステップ3完了");
 
     if ($request->tags) {
       foreach ($request->tags as $newTag) {
-        if ($newTag !== null) {
-          $tag_data = Tag::firstOrCreate(['name' => $newTag]);
+        if ($newTag["name"] !== null) {
+          $tag_data = Tag::firstOrCreate(['name' => $newTag["name"]]);
           $tagsData[] = $tag_data;
 
           $articleTagsData[] = ArticleOfItemTag::firstOrCreate([
@@ -288,43 +315,24 @@ class FoodItemController extends Controller
     }
 
     $article->push();
+    Log::debug("ステップ4完了");
 
-    $newItems = $request->items;
     $oldItems = $article->items;
-    Log::debug("newItems↓");
-    Log::debug($newItems);
-    Log::debug("oldItems↓");
-    Log::debug($oldItems);
-    $maxItemsNum = max(count($newItems), count($oldItems));
-    $itemsData = [];
-    for ($i = 0; $i < $maxItemsNum; $i++) {
-      if (
-        isset($newItems[$i]) && isset($oldItems[$i]) && isset($newItems[$i]["id"])
-        && $newItems[$i]["id"] === $oldItems[$i]["id"]
-      ) {
-        $oldItems[$i]->name = $newItems[$i]["name"];
-        $oldItems[$i]->where_to_buy = $newItems[$i]["where_to_buy"];
-        $oldItems[$i]->price = $newItems[$i]["price"];
-      } else {
-        Log::debug("id違う");
-        if (isset($newItems[$i])) {
-          Log::debug("新しい材料あり");
-          $itemsData[] = Item::create([
-            "article_of_item_id" => $article->id,
-            "name" => $newItems[$i]["name"],
-            "where_to_buy" => $newItems[$i]['where_to_buy'],
-            "price" => $newItems[$i]['price'],
-          ]);
-        }
-        if (isset($oldItems[$i])) {
-          Log::debug("古い材料削除");
-          Log::debug($oldItems[$i]);
-          $oldItems[$i]->delete();
-        }
-      }
+
+    foreach ($oldItems as $oldItem) {
+      $oldItem->delete();
     }
-    Log::debug("itemsData↓");
-    Log::debug($itemsData);
+
+    $itemsData = [];
+    foreach ($request->items as $item) {
+      $itemsData[] = Item::create([
+        "article_of_item_id" => $article->id,
+        "name" => $item["name"],
+        "where_to_buy" => $item['where_to_buy'],
+        "price" => $item['price'],
+      ]);
+    }
+    Log::debug("ステップ5完了");
 
     $response = [
       "article" => $article,
