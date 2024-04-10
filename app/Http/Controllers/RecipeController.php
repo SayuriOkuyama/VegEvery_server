@@ -133,14 +133,14 @@ class RecipeController extends Controller
       "thumbnail_url" => $url,
       "cooking_time" => $request->time,
       "servings" => $request->servings,
-      "vegan" => $request->vegan,
-      "oriental_vegetarian" => $request->oriental_vegetarian,
-      "ovo_vegetarian" => $request->oriental_vegetarian,
-      "pescatarian" => $request->pescatarian,
-      "lacto_vegetarian" => $request->lacto_vegetarian,
-      "pollo_vegetarian" => $request->pollo_vegetarian,
-      "fruitarian" => $request->fruitarian,
-      "other_vegetarian" => $request->other_vegetarian,
+      "vegan" => $request->vegan === "true" ? true : false,
+      "oriental_vegetarian" => $request->oriental_vegetarian === "true" ? true : false,
+      "ovo_vegetarian" => $request->ovo_vegetarian === "true" ? true : false,
+      "pescatarian" => $request->pescatarian === "true" ? true : false,
+      "lacto_vegetarian" => $request->lacto_vegetarian === "true" ? true : false,
+      "pollo_vegetarian" => $request->pollo_vegetarian === "true" ? true : false,
+      "fruitarian" => $request->fruitarian === "true" ? true : false,
+      "other_vegetarian" => $request->other_vegetarian === "true" ? true : false,
     ]);
     Log::debug("ステップ２完了");
 
@@ -148,15 +148,13 @@ class RecipeController extends Controller
 
     for ($i = 0; $i < count($request->steps); $i++) {
       Log::debug($request->steps[$i]);
-
+      $path = "";
+      $url = "";
       if (isset($request->steps[$i]["image"])) {
         Log::debug($request->file('steps.' . $i . '.image'));
 
         $path = Storage::putFile('recipes/step_images', $request->file('steps.' . $i . '.image'));
         $url =  "https://static.vegevery.my-raga-bhakti.com/" . $path;
-      } else {
-        $path = "";
-        $url = "";
       }
       $stepsData[] = RecipeStep::create([
         "article_of_recipe_id" => $article->id,
@@ -241,24 +239,38 @@ class RecipeController extends Controller
    */
   public function update(Request $request, string $id)
   {
+    Log::debug('recipe-update');
     Log::debug($request);
     $article = ArticleOfRecipe::with('user', 'materials')->where('id', $id)->first();
 
+    $path = "";
+    $url = "";
+
+    if ($request->thumbnail_path === "") {
+      $path = Storage::putFile('recipes/thumbnail', $request->file('thumbnail_newFile'));
+      $url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
+    } else {
+      $path = $request->thumbnail_path;
+      $url = $request->thumbnail_url;
+    }
+
     $article->title = $request->title;
-    $article->cooking_time = $request->cooking_time;
+    $article->cooking_time = $request->time;
     $article->servings = $request->servings;
-    $article->thumbnail_path = $request->thumbnail["thumbnail_path"];
-    $article->thumbnail_url = $request->thumbnail["thumbnail_url"];
-    $article->vegan = $request->vege_type["vegan"];
-    $article->oriental_vegetarian = $request->vege_type["oriental_vegetarian"];
-    $article->ovo_vegetarian = $request->vege_type["ovo_vegetarian"];
-    $article->pescatarian = $request->vege_type["pescatarian"];
-    $article->lacto_vegetarian = $request->vege_type["lacto_vegetarian"];
-    $article->pollo_vegetarian = $request->vege_type["pollo_vegetarian"];
-    $article->fruitarian = $request->vege_type["fruitarian"];
-    $article->other_vegetarian = $request->vege_type["other_vegetarian"];
+    $article->thumbnail_path = $path;
+    $article->thumbnail_url = $url;
+    $article->vegan = $request->vegan === "true" ? true : false;
+    $article->oriental_vegetarian = $request->oriental_vegetarian === "true" ? true : false;
+    $article->ovo_vegetarian = $request->ovo_vegetarian === "true" ? true : false;
+    $article->pescatarian = $request->pescatarian === "true" ? true : false;
+    $article->lacto_vegetarian = $request->lacto_vegetarian === "true" ? true : false;
+    $article->pollo_vegetarian = $request->pollo_vegetarian === "true" ? true : false;
+    $article->fruitarian = $request->fruitarian === "true" ? true : false;
+    $article->other_vegetarian = $request->other_vegetarian === "true" ? true : false;
     $article->push();
     Log::debug("第一ステップ完了");
+    Log::debug($article);
+
     $newMaterials = $request->materials;
     $oldMaterials = $article->materials;
 
@@ -309,23 +321,26 @@ class RecipeController extends Controller
 
     if ($newSteps) {
       for ($i = 0; $i < count($newSteps); $i++) {
-        if (isset($newSteps[$i]["image"])) {
-          $stepsData[] = RecipeStep::create([
-            "article_of_recipe_id" => $article->id,
-            "order" => $newSteps[$i]["order"],
-            "image_path" => $newSteps[$i]["image_path"],
-            "image_url" => $newSteps[$i]["image_url"],
-            "text" => $newSteps[$i]["text"],
-          ]);
+        $path = "";
+        $url = "";
+        if (isset($newSteps[$i]["file"])) {
+          $path = Storage::putFile('recipes/step_images', $request->file('steps.' . $i . '.file'));
+          $url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
+        } elseif (!isset($newSteps[$i]["file"]) && $newSteps[$i]["url"] === "") {
+          $path = "";
+          $url = "";
         } else {
-          $stepsData[] = RecipeStep::create([
-            "article_of_recipe_id" => $article->id,
-            "order" => $newSteps["step_order_text"][$i]["order"],
-            "image_path" => "",
-            "image_url" => "",
-            "text" => $newSteps["step_order_text"][$i]["text"],
-          ]);
+          $path = $newSteps[$i]["path"];
+          $url = $newSteps[$i]["url"];
         }
+
+        $stepsData[] = RecipeStep::create([
+          "article_of_recipe_id" => $article->id,
+          "order" => $newSteps[$i]["order"],
+          "image_path" => $path,
+          "image_url" => $url,
+          "text" => $newSteps[$i]["text"],
+        ]);
       }
     }
     Log::debug("第3ステップ完了");
@@ -342,6 +357,7 @@ class RecipeController extends Controller
 
     if ($request->tags) {
       foreach ($request->tags as $newTag) {
+        Log::debug($newTag);
         if ($newTag !== null) {
           $tag_data = Tag::firstOrCreate(['name' => $newTag]);
           $tagsData[] = $tag_data;
@@ -384,6 +400,9 @@ class RecipeController extends Controller
     BookshelfArticleOfRecipe::where("article_of_recipe_id", $id)->delete();
     Log::debug("5完了");
     ArticleOfRecipe::find($id)->delete();
+    Log::debug("6完了");
+    Like::where(["likeable_type" => "ArticleOfRecipe", "likeable_id" => $id])->delete();
+    Log::debug("削除しました");
     return response()->json("削除しました");
   }
 
