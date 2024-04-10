@@ -19,8 +19,6 @@ services:
     build:
       context: .
       dockerfile: ./docker/8.3/Dockerfile
-    # extra_hosts:
-    #   - 'host.docker.internal:host-gateway'
     ports:
       - '8000:80'
     environment:
@@ -36,6 +34,7 @@ services:
       - vegenet
     depends_on:
       - database
+
 networks:
   vegenet:
     driver: bridge

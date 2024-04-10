@@ -21,11 +21,14 @@ class AuthController extends Controller
     return $request->user();
   }
 
+
   public function register(Request $request)
   {
     Log::debug("Auth-register");
     Log::debug($request);
 
+    $path = "";
+    $url = "";
     if ($request->iconFile) {
       $path = Storage::putFile('recipes/thumbnail', $request->file('iconFile'));
       $url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
@@ -52,11 +55,12 @@ class AuthController extends Controller
         'icon_storage_path' => $path
       ]);
 
-      SocialAccount::create([
+      $social = SocialAccount::create([
         "user_id" => $user->id,
         "provider" => $request->provider,
-        "provider_id" => $request->provider_id
+        "provider_id" => $request->providerId
       ]);
+      Log::debug($social);
     } else {
       $user = User::create([
         "account_id" => $request->account_id,
@@ -77,6 +81,23 @@ class AuthController extends Controller
     return response()->json(['token' => $token, "user" => $user], 200);
   }
 
+
+  /**
+   * アカウント ID が使用可能か確認
+   */
+  public function checkAccountId(Request $request)
+  {
+    Log::debug($request);
+    $result = User::where('account_id', $request->id)->first();
+    Log::debug($result);
+
+    if ($result) {
+      return response()->json(['result' => false]);
+    }
+    return response()->json(['result' => true]);
+  }
+
+
   public function login(Request $request)
   {
     Log::debug("Auth-login");
@@ -85,7 +106,7 @@ class AuthController extends Controller
     // social ログインの場合
     if ($request->provider) {
       $social_account = SocialAccount::where([
-        ['provider_id', '=', $request->provider_id],
+        ['provider_id', '=', $request->providerId],
         ['provider', '=', $request->provider],
       ])->first();
 
@@ -108,8 +129,10 @@ class AuthController extends Controller
 
       if (!$user || !Hash::check($request->password, $user->password)) {
         return response()->json([
-          'message' => 'ユーザー名かパスワードが間違っています'
-        ], 401);
+          'errors' => [
+            'login' => ['IDかパスワードが間違っています']
+          ]
+        ], 422);
       }
 
       $token = $user->createToken('sanctum_token')->plainTextToken;

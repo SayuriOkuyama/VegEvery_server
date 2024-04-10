@@ -25,29 +25,14 @@ class UserFactory extends Factory
   {
     $icon_storage_path = fake()->randomElement(
       [
-        "users/icon/IMG_3223.PNG",
-        "users/icon/outside.jpeg",
-        "users/icon/tabitha-turner-qtr0Lw4fMGc-unsplash.jpg",
-        "users/icon/user_icon.png",
+        "user/icon_image/IMG_3223.PNG",
+        "user/icon_image/outside.jpeg",
+        "user/icon_image/tabitha-turner-qtr0Lw4fMGc-unsplash.jpg",
+        "user/icon_image/user_icon.png",
       ]
     );
-    if ($icon_storage_path === "users/icon/IMG_3223.PNG") {
-      $icon_url
-        = "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object" .
-        "/public/VegEvery-backet/users/icon/IMG_3223.PNG";
-    } elseif ($icon_storage_path === "users/icon/outside.jpeg") {
-      $icon_url =
-        "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object" .
-        "/public/VegEvery-backet/users/icon/outside.jpeg";
-    } elseif ($icon_storage_path === "users/icon/user_icon.png") {
-      $icon_url =
-        "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object" .
-        "/public/VegEvery-backet/users/icon/user_icon.png";
-    } else {
-      $icon_url =
-        "https://sbbfkhueljpgbvhxguip.supabase.co/storage/v1/object" .
-        "/public/VegEvery-backet/users/icon/tabitha-turner-qtr0Lw4fMGc-unsplash.jpg";
-    }
+
+    $icon_url = "https://static.vegevery.my-raga-bhakti.com/" . $icon_storage_path;
 
     $faker = \Faker\Factory::create();
 
