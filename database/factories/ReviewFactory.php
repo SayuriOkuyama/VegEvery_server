@@ -18,19 +18,20 @@ class ReviewFactory extends Factory
    */
   public function definition(): array
   {
+    $thumbnail_path = fake()->randomElement([
+      "reviews/brooke-lark-kXQ3J7_2fpc-unsplash.jpg",
+      "reviews/haseeb-jamil-J9lD6FS6_cs-unsplash.jpg",
+      "reviews/victoria-shes-4MEL9XS-3JQ-unsplash.jpg"
+    ]);
+
+    $thumbnail_url = "https://static.vegevery.my-raga-bhakti.com/" . $thumbnail_path;
+
     return [
       'star' => fake()->numberBetween($min = 1, $max = 5),
-      'thumbnail' => fake()->imageUrl($width = 300, $height = 300),
+      'thumbnail_path' => $thumbnail_path,
+      'thumbnail_url' => $thumbnail_url,
       'text' => fake()->realText($maxNbChars = 200),
       'number_of_likes' => fake()->numberBetween($min = 0, $max = 500),
-      'vegan' => fake()->randomElement([true, false]),
-      'oriental_vegetarian' => fake()->randomElement([true, false]),
-      'ovo_vegetarian' => fake()->randomElement([true, false]),
-      'pescatarian' => fake()->randomElement([true, false]),
-      'lacto_vegetarian' => fake()->randomElement([true, false]),
-      'pollo_vegetarian' => fake()->randomElement([true, false]),
-      'fruitarian' => fake()->randomElement([true, false]),
-      'other_vegetarian' => fake()->randomElement([true, false]),
       'restaurant_id' => fake()->randomElement([1, 2, 3]),
       'user_id' => User::factory()
     ];

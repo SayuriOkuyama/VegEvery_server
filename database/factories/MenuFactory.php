@@ -20,7 +20,15 @@ class MenuFactory extends Factory
     return [
       'name' => fake()->realText(10),
       'price' => fake()->numberBetween($min = 100, $max = 5000),
-      'review_id' => Review::factory()
+      'review_id' => Review::factory(),
+      'vegan' => fake()->randomElement([true, false]),
+      'oriental_vegetarian' => fake()->randomElement([true, false]),
+      'ovo_vegetarian' => fake()->randomElement([true, false]),
+      'pescatarian' => fake()->randomElement([true, false]),
+      'lacto_vegetarian' => fake()->randomElement([true, false]),
+      'pollo_vegetarian' => fake()->randomElement([true, false]),
+      'fruitarian' => fake()->randomElement([true, false]),
+      'other_vegetarian' => fake()->randomElement([true, false]),
     ];
   }
 }
