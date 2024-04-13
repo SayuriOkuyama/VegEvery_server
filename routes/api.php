@@ -56,13 +56,14 @@ Route::prefix('maps')
   ->name('maps.')
   ->controller(MapController::class)
   ->group(function () {
-    Route::get('/', 'index')->name('index');
-    Route::get('/search', 'search')->name('search');
-    Route::get('/{id}', 'get')->name('get');
-    Route::post('/', 'store')->name('store');
-    Route::post('/{id}/comment', 'commentStore')->name('commentStore');
-    Route::put('/{id}', 'update')->name('update');
-    Route::delete('/{id}', 'delete')->name('delete');
+    Route::middleware(['session'])
+      ->group(function () {
+        Route::get('/reviews/{id}', 'get')->name('get');
+      });
+    Route::middleware(['auth:sanctum'])
+      ->group(function () {
+        Route::post('/reviews', 'store')->name('store');
+      });
   });
 
 Route::prefix('user')
