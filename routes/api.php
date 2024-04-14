@@ -63,6 +63,7 @@ Route::prefix('maps')
     Route::middleware(['auth:sanctum'])
       ->group(function () {
         Route::post('/reviews', 'store')->name('store');
+        Route::delete('/reviews/{id}', 'delete')->name('delete');
       });
   });
 

@@ -20,14 +20,6 @@ class Review extends Model
     'star',
     'text',
     'number_of_likes',
-    'vegan',
-    'oriental_vegetarian',
-    'ovo_vegetarian',
-    'pescatarian',
-    'lacto_vegetarian',
-    'pollo_vegetarian',
-    'fruitarian',
-    'other_vegetarian',
   ];
 
 

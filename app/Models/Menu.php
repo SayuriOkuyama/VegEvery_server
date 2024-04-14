@@ -14,9 +14,17 @@ class Menu extends Model
     'review_id',
     'name',
     'price',
+    'vegan',
+    'oriental_vegetarian',
+    'ovo_vegetarian',
+    'pescatarian',
+    'lacto_vegetarian',
+    'pollo_vegetarian',
+    'fruitarian',
+    'other_vegetarian',
   ];
 
-  public function reviews(): BelongsTo
+  public function review(): BelongsTo
   {
     return $this->belongsTo(Review::class);
   }
