@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Menu;
 use App\Models\Restaurant;
 use App\Models\Review;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -12,6 +13,36 @@ use Illuminate\Support\Facades\Storage;
 
 class MapController extends Controller
 {
+  public function get(string $id)
+  {
+    $restaurant = Restaurant::where('place_id', $id)->first();
+    $reviews = Review::where("restaurant_id", $restaurant->id)->get();
+
+    $reviewWithUser = [];
+    foreach ($reviews as $review) {
+      $user = User::find($review->user_id);
+      $menus = Menu::where("review_id", $review->id)->get();
+      $reviewWithUser[] = [
+        "id" => $review->id,
+        "user_id" => $review->user_id,
+        "userName" => $user->name,
+        "userIcon" => $user->icon_url,
+        "thumbnail_url" => $review->thumbnail_url,
+        "stars" => $review->star,
+        "text" => $review->text,
+        "likes" => $review->number_of_likes,
+        "menus" => $menus
+      ];
+    };
+
+    $response = [
+      "restaurant" => $restaurant,
+      "reviews" => $reviewWithUser
+    ];
+
+    return response()->json($response);
+  }
+
   public function store(Request $request)
   {
     Log::debug($request);
@@ -60,13 +91,20 @@ class MapController extends Controller
 
     Log::debug("ステップ３完了");
 
-
     $menus = [];
     foreach ($request->menus as $menu) {
       $menus[] = Menu::create([
         'review_id' => $reviewData->id,
         "name" => $menu["name"],
         "price" => $menu["price"],
+        "vegan" => $menu["vege_type"]["vegan"] === "true" ? true : false,
+        'oriental_vegetarian' => $menu["vege_type"]["oriental_vegetarian"] === "true" ? true : false,
+        'ovo_vegetarian' => $menu["vege_type"]["ovo_vegetarian"] === "true" ? true : false,
+        'pescatarian' => $menu["vege_type"]["pescatarian"] === "true" ? true : false,
+        'lacto_vegetarian' =>  $menu["vege_type"]["lacto_vegetarian"] === "true" ? true : false,
+        'pollo_vegetarian' => $menu["vege_type"]["pollo_vegetarian"] === "true" ? true : false,
+        'fruitarian' => $menu["vege_type"]["fruitarian"] === "true" ? true : false,
+        'other_vegetarian' =>  $menu["vege_type"]["other_vegetarian"] === "true" ? true : false,
       ]);
       Log::debug("ステップ４完了");
 
@@ -94,6 +132,14 @@ class MapController extends Controller
 
     $restaurant->star = $average;
 
+    // タイプも更新
+    foreach ($types as $type => $value) {
+      if ($menu["vege_type"][$type] === "true") {
+        Log::debug($restaurant[$type]);
+        $restaurant[$type] = true;
+      };
+    }
+
     $restaurant->save();
 
     Log::debug("ステップ６完了");
@@ -103,6 +149,73 @@ class MapController extends Controller
       "restaurantData" => $restaurant,
       "reviewData" => $reviewData,
       "menusData" => $menus,
+    ];
+
+    return response()->json($response);
+  }
+
+  public function delete(string $id)
+  {
+    $review = Review::find($id);
+
+    Menu::where("review_id", $id)->delete();
+
+    $restaurant_id = $review->restaurant_id;
+    $review->delete();
+
+    Log::debug("ステップ１完了");
+
+    $reviews = Review::where("restaurant_id", $restaurant_id)->get();
+    $restaurant = Restaurant::find($restaurant_id);
+
+    Log::debug("ステップ２完了");
+
+    if (!$reviews) {
+      $restaurant->delete();
+
+      Log::debug("ステップ２完了(レストラン削除)");
+    } else {
+      // レストラン平均評価数を更新
+      $count = Restaurant::count("star");
+      $sum = Restaurant::sum("star");
+      $average = $sum / $count;
+      // 最も近い0.5に丸める
+      $average = round($average * 2) / 2;
+
+      // 小数点以下1桁まで表示
+      $average = number_format($average, 1);
+      Log::debug("average: $average");
+
+      $restaurant->star = $average;
+
+      $types = [
+        "vegan",
+        'oriental_vegetarian',
+        'ovo_vegetarian',
+        'pescatarian',
+        'lacto_vegetarian',
+        'pollo_vegetarian',
+        'fruitarian',
+        'other_vegetarian',
+      ];
+
+      // true が１個もなかったら false に更新
+      foreach ($types as $type) {
+        $result = Menu::whereHas('review', function ($query) use ($restaurant_id) {
+          $query->where('restaurant_id', $restaurant_id);
+        })->where($type, true)->first();
+
+        if (!$result) {
+          $restaurant[$type] = false;
+        }
+      }
+
+      $restaurant->save();
+      Log::debug("ステップ２完了(レストラン更新)");
+    }
+
+    $response = [
+      "message" => "削除しました"
     ];
 
     return response()->json($response);
