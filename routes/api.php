@@ -59,6 +59,7 @@ Route::prefix('maps')
     Route::middleware(['session'])
       ->group(function () {
         Route::get('/reviews/{id}', 'get')->name('get');
+        Route::post('/reviews/search', 'search')->name('search');
       });
     Route::middleware(['auth:sanctum'])
       ->group(function () {

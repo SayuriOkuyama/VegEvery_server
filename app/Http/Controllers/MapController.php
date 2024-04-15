@@ -43,6 +43,40 @@ class MapController extends Controller
     return response()->json($response);
   }
 
+  public function search(Request $request)
+  {
+    Log::debug($request);
+
+    $restaurants = Restaurant::whereIn('place_id', $request->id)->get();
+    Log::debug($restaurants);
+
+    $restaurantIds = [];
+    $vegeTags = [];
+    if ($restaurants) {
+      foreach ($restaurants as $restaurant) {
+        $restaurantIds[] = $restaurant->place_id;
+        $vegeTags[$restaurant->place_id] = [
+          $restaurant->vegan,
+          $restaurant->oriental_vegetarian,
+          $restaurant->ovo_vegetarian,
+          $restaurant->pescatarian,
+          $restaurant->lacto_vegetarian,
+          $restaurant->pollo_vegetarian,
+          $restaurant->fruitarian,
+          $restaurant->other_vegetarian,
+        ];
+      }
+    }
+
+    $response = [
+      "restaurantIds" => $restaurantIds,
+      "vegeTags" => $vegeTags
+    ];
+    Log::debug($response);
+
+    return response()->json($response);
+  }
+
   public function store(Request $request)
   {
     Log::debug($request);
