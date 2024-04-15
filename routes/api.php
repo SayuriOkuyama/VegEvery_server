@@ -84,5 +84,8 @@ Route::prefix('user')
       ->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/logout', 'logout')->name('logout');
+        Route::get('/{id}', 'getArticles')->name('getArticles');
+        Route::get('/bookshelves/{id}', 'getBookshelves')->name('getBookshelves');
+        Route::get('/bookshelves/bookshelf/{id}/', 'getBookshelfArticles')->name('getBookshelfArticles');
       });
   });
