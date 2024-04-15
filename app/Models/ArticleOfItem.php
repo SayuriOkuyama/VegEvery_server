@@ -60,4 +60,9 @@ class ArticleOfItem extends Model
   {
     return $this->morphMany(Like::class, 'likeable');
   }
+
+  public function bookshelves(): BelongsToMany
+  {
+    return $this->belongsToMany(Bookshelf::class, 'bookshelf_article_of_item');
+  }
 }

@@ -203,18 +203,4 @@ class AuthController extends Controller
     }
     return response()->json($response);
   }
-
-  public function getBookshelves(string $id)
-  {
-    $bookshelves = Bookshelf::where("user_id", $id)->orderBy('updated_at', 'desc')->paginate(20);
-
-    return response()->json($bookshelves);
-  }
-
-  public function getBookshelfArticles(string $id)
-  {
-    $bookshelfData = Bookshelf::with("articlesOfRecipe", "articlesOfItem")->where("id", $id)->paginate(20);
-
-    return response()->json($bookshelfData);
-  }
 }

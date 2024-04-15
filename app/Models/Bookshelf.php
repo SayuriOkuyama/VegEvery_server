@@ -27,7 +27,7 @@ class Bookshelf extends Model
    */
   public function articlesOfRecipe(): BelongsToMany
   {
-    return $this->belongsToMany(ArticleOfRecipe::class);
+    return $this->belongsToMany(ArticleOfRecipe::class, 'bookshelf_article_of_recipe');
   }
 
   /**
@@ -36,6 +36,6 @@ class Bookshelf extends Model
    */
   public function articlesOfItem(): BelongsToMany
   {
-    return $this->belongsToMany(ArticleOfItem::class);
+    return $this->belongsToMany(ArticleOfItem::class, 'bookshelf_article_of_item');
   }
 }
