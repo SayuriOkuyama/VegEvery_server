@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Enums\OAuthProviderEnum;
+use App\Models\ArticleOfItem;
+use App\Models\ArticleOfRecipe;
+use App\Models\Bookshelf;
 use App\Models\SocialAccount;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -21,6 +24,21 @@ class AuthController extends Controller
     return $request->user();
   }
 
+  public function getArticles()
+  {
+    $user = Auth::user();
+
+    $recipes = ArticleOfRecipe::where("user_id", $user->id)->orderBy('updated_at', 'desc')->paginate(20);
+
+    $items = ArticleOfItem::where("user_id", $user->id)->orderBy('updated_at', 'desc')->paginate(20);
+
+    $response = [
+      "recipes" => $recipes,
+      "items" => $items
+    ];
+
+    return response()->json($response);
+  }
 
   public function register(Request $request)
   {

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BookshelfController;
 use App\Http\Controllers\FoodItemController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\MapController;
@@ -84,5 +85,16 @@ Route::prefix('user')
       ->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/logout', 'logout')->name('logout');
+        Route::get('/{id}', 'getArticles')->name('getArticles');
       });
+  });
+
+Route::prefix('bookshelves')
+  ->name('bookshelves.')
+  ->controller(BookshelfController::class)
+  ->middleware(['auth:sanctum'])
+  ->group(function () {
+    Route::get('/{id}', 'getBookshelves')->name('getBookshelves');
+    Route::post('/{id}', 'create')->name('create');
+    Route::get('/bookshelf/{id}/', 'getBookshelfArticles')->name('getBookshelfArticles');
   });
