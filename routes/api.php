@@ -95,6 +95,7 @@ Route::prefix('bookshelves')
   ->middleware(['auth:sanctum'])
   ->group(function () {
     Route::get('/{id}', 'getBookshelves')->name('getBookshelves');
-    Route::post('/{id}', 'create')->name('create');
-    Route::get('/bookshelf/{id}/', 'getBookshelfArticles')->name('getBookshelfArticles');
+    Route::post('/create/{id}', 'create')->name('create');
+    Route::get('/bookshelf/{id}', 'getBookshelfArticles')->name('getBookshelfArticles');
+    Route::post('/store_article', 'storeArticle')->name('storeArticle');
   });

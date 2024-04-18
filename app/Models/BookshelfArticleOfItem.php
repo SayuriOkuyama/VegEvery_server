@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BookshelfArticleOfItem extends Model
 {
@@ -15,4 +16,9 @@ class BookshelfArticleOfItem extends Model
     'bookshelf_id',
     'article_of_item_id',
   ];
+
+  public function articlesOfItem(): BelongsTo
+  {
+    return $this->belongsTo(ArticleOfItem::class);
+  }
 }
