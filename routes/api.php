@@ -98,4 +98,6 @@ Route::prefix('bookshelves')
     Route::post('/create/{id}', 'create')->name('create');
     Route::get('/bookshelf/{id}', 'getBookshelfArticles')->name('getBookshelfArticles');
     Route::post('/store_article', 'storeArticle')->name('storeArticle');
+    Route::delete('/delete/bookshelf/{id}', 'deleteBookshelf')->name('deleteBookshelf');
+    Route::delete('/delete/favorites/{id}', 'deleteFavorites')->name('deleteFavorites');
   });

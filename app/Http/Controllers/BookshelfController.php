@@ -41,6 +41,7 @@ class BookshelfController extends Controller
   public function getBookshelfArticles(string $id)
   {
     Log::debug("getBookshelfArticles");
+    $bookshelf = Bookshelf::find($id);
 
     $articlesOfRecipePivots = BookshelfArticleOfRecipe::where("bookshelf_id", $id)->get();
     $articlesOfItemPivots = BookshelfArticleOfItem::where("bookshelf_id", $id)->get();
@@ -66,7 +67,12 @@ class BookshelfController extends Controller
 
     Log::debug($paginated);
 
-    return response()->json($paginated);
+    $response = [
+      "bookshelf" => $bookshelf,
+      "pagination" => $paginated
+    ];
+
+    return response()->json($response);
   }
 
   public function storeArticle(Request $request)
@@ -88,5 +94,42 @@ class BookshelfController extends Controller
 
       return response()->json($pivot);
     }
+  }
+
+  public function deleteFavorites(string $id, Request $request)
+  {
+    Log::debug("deleteFavorites");
+    Log::debug($request);
+    $array = json_decode($request->getContent(), true);
+
+    foreach ($array as $data) {
+      Log::debug($data);
+      if ($data["type"] === "recipe") {
+        BookshelfArticleOfRecipe::where([
+          "bookshelf_id" => $id,
+          "article_of_recipe_id" => $data["id"]
+        ])->delete();
+      } else {
+        BookshelfArticleOfItem::where([
+          "bookshelf_id" => $id,
+          "article_of_item_id" => $data["id"]
+        ])->delete();
+      }
+    }
+
+    return response()->json("削除しました");
+  }
+
+  public function deleteBookshelf(string $id)
+  {
+    Log::debug("deleteBookshelf");
+
+    $bookshelf = Bookshelf::find($id);
+
+    BookshelfArticleOfRecipe::where("bookshelf_id", $id)->delete();
+    BookshelfArticleOfItem::where("bookshelf_id", $id)->delete();
+    $bookshelf->delete();
+
+    return response()->json("削除しました");
   }
 }
