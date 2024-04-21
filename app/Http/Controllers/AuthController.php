@@ -27,6 +27,30 @@ class AuthController extends Controller
     return $request->user();
   }
 
+  public function getUser(string $id)
+  {
+    Log::debug("getUser");
+    $user = User::find($id);
+
+    return response()->json($user);
+  }
+
+  /**
+   * ユーザー個人のレシピ記事を返す
+   */
+  public function getUserArticles(string $id, Request $request)
+  {
+    Log::debug("getUserArticles");
+    Log::debug($request);
+    if ($request->articleType === "recipes") {
+      $articles = ArticleOfRecipe::with('user')->where("user_id", $id)->orderBy('updated_at', 'desc')->paginate(20);
+      return response()->json($articles, 200);
+    } else {
+      $articles = ArticleOfItem::with('user')->where("user_id", $id)->orderBy('updated_at', 'desc')->paginate(20);
+      return response()->json($articles, 200);
+    }
+  }
+
   public function getArticles()
   {
     $user = Auth::user();

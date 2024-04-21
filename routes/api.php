@@ -75,6 +75,8 @@ Route::prefix('user')
   ->group(function () {
     Route::middleware(['session'])
       ->group(function () {
+        Route::get('/get/{id}', 'getUser')->name('getUser');
+        Route::get('/articles/{id}', 'getUserArticles')->name('getUserArticles');
         Route::post('/login', 'login')->name('login');
         Route::post('/register', 'register')->name('register');
         Route::post('/check_account_id', 'checkAccountId')->name('checkAccountId');
