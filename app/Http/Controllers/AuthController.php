@@ -164,8 +164,43 @@ class AuthController extends Controller
     // 現在のアクセストークンを削除して特定のセッションをログアウト
     $request->user()->currentAccessToken()->delete();
 
-    // レスポンスを返す
     return response()->json(['message' => 'ログアウトしました。'], 200);
+  }
+
+  public function update(string $id, Request $request)
+  {
+    Log::debug("Auth-update");
+    Log::debug($request);
+
+    $user = User::find($id);
+
+    if ($request->icon_file) {
+      $path = Storage::putFile('user', $request->file('iconFile'));
+      $user->icon_storage_path = $path;
+      $user->icon_url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
+    } else if (!$request->icon_url) {
+      $user->icon_storage_path = "user/icon_image/user_icon.png";
+      $user->icon_url = 'https://static.vegevery.my-raga-bhakti.com/user/icon_image/user_icon.png';
+    }
+
+    $vegetarian_type = [
+      "ヴィーガン" => 'vegan',
+      "オリエンタル・ベジタリアン" => 'oriental_vegetarian',
+      "オボ・ベジタリアン" => 'ovo_vegetarian',
+      "ペスカタリアン" => 'pescatarian',
+      "ラクト・ベジタリアン" => 'lacto_vegetarian',
+      "ポーヨ・ベジタリアン" => 'pollo_vegetarian',
+      "フルータリアン" => 'fruitarian',
+      "その他のベジタリアン" => 'other_vegetarian',
+    ];
+
+    $user->name = $request->name;
+    $user->vegetarian_type = $vegetarian_type[$request->vegetarian_type];
+    $user->introduction = $request->introduction;
+
+    $user->save();
+
+    return response()->json($user);
   }
 
   public function redirect(OAuthProviderEnum $provider)
@@ -201,6 +236,40 @@ class AuthController extends Controller
         "socialUser" => $providerUser,
       ];
     }
+    return response()->json($response);
+  }
+
+  public function passwordReset(string $id, Request $request)
+  {
+    Log::debug("passwordReset");
+    Log::debug($request);
+
+    $user = User::find($id);
+
+    $user->password = $request->password;
+
+    return response()->json("パスワードを変更しました。");
+  }
+
+  public function searchUser(Request $request)
+  {
+    Log::debug("searchUser");
+    Log::debug($request->id);
+
+    $user = User::where("account_id", $request->id)->first();
+
+    if ($user) {
+      $response = [
+        "id" => $user->id,
+        "question" => $user->secret_question,
+        "answer" => $user->secret_answer,
+      ];
+    } else {
+      $response = [
+        "message" => "failed"
+      ];
+    }
+
     return response()->json($response);
   }
 }

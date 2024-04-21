@@ -78,6 +78,8 @@ Route::prefix('user')
         Route::post('/login', 'login')->name('login');
         Route::post('/register', 'register')->name('register');
         Route::post('/check_account_id', 'checkAccountId')->name('checkAccountId');
+        Route::post('/forget_password/search_user', 'searchUser')->name('searchUser');
+        Route::post('/forget_password/reset/{id}', 'passwordReset')->name('passwordReset');
         Route::get('auth/{provider}', 'redirect')->name('redirect');
         Route::get('auth/{provider}/callback', 'callback')->name('callback');
       });
@@ -86,6 +88,8 @@ Route::prefix('user')
         Route::get('/', 'index')->name('index');
         Route::post('/logout', 'logout')->name('logout');
         Route::get('/{id}', 'getArticles')->name('getArticles');
+        Route::put('/update/{id}', 'update')->name('update');
+        Route::post('/password/reset/{id}', 'passwordReset')->name('passwordReset');
       });
   });
 
