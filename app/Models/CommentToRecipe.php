@@ -31,8 +31,8 @@ class CommentToRecipe extends Model
     return $this->belongsTo(User::class);
   }
 
-  public function likes(): MorphMany
-  {
-    return $this->morphMany(Like::class, 'likeable');
-  }
+  // public function likes(): MorphMany
+  // {
+  //   return $this->morphMany(Like::class, 'likeable');
+  // }
 }

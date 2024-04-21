@@ -39,8 +39,8 @@ class Review extends Model
     return $this->hasMany(Menu::class);
   }
 
-  public function likes(): MorphMany
-  {
-    return $this->morphMany(Like::class, 'likeable');
-  }
+  // public function likes(): MorphMany
+  // {
+  //   return $this->morphMany(Like::class, 'likeable');
+  // }
 }

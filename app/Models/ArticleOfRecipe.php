@@ -69,4 +69,14 @@ class ArticleOfRecipe extends Model
   {
     return $this->belongsToMany(Bookshelf::class, "bookshelf_article_of_recipe");
   }
+
+  public static function boot()
+  {
+    parent::boot();
+
+    self::deleting(function ($articleOfRecipe) {
+      // 削除時の処理
+      $articleOfRecipe->likes()->delete();
+    });
+  }
 }

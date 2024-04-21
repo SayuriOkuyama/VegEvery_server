@@ -6,6 +6,9 @@ use App\Enums\OAuthProviderEnum;
 use App\Models\ArticleOfItem;
 use App\Models\ArticleOfRecipe;
 use App\Models\Bookshelf;
+use App\Models\RecipeStep;
+use App\Models\Report;
+use App\Models\Review;
 use App\Models\SocialAccount;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -271,5 +274,54 @@ class AuthController extends Controller
     }
 
     return response()->json($response);
+  }
+
+  public function deleteAccount(string $id)
+  {
+    Log::debug("deleteAccount");
+
+    $user = User::find($id);
+
+    // 画像削除が必要なモデル
+    // ArticleOfRecipe,RecipeStep,ArticleOfItem,Report,Review,User
+
+    Storage::delete($user->icon_storage_path);
+
+    $ArticlesOfRecipe = ArticleOfRecipe::where("user_id", $id)->get();
+
+    foreach ($ArticlesOfRecipe as $ArticleOfRecipe) {
+      Storage::delete($ArticleOfRecipe->thumbnail_path);
+
+      $steps = RecipeStep::where("article_of_recipe_id", $ArticleOfRecipe->id)->get();
+      foreach ($steps as $step) {
+        Storage::delete($step->image_path);
+      }
+    }
+
+    $ArticlesOfItem = ArticleOfItem::where("user_id", $id)->get();
+
+    foreach ($ArticlesOfItem as $ArticleOfItem) {
+      Storage::delete($ArticleOfItem->thumbnail_path);
+
+      $reports = Report::where("article_of_item_id", $ArticleOfItem->id)->get();
+      foreach ($reports as $report) {
+        Storage::delete($report->image_path);
+      }
+    }
+
+    $reviews = Review::where("user_id", $id)->get();
+
+    foreach ($reviews as $review) {
+      Storage::delete($review->thumbnail_path);
+    }
+
+    // 画像削除が不要なモデル
+    // Material,Item,Menu,Bookshelf(今後サムネイルを設定するなら必要)、
+    // CommentToRecipe,CommentToItem,SocialAccount,
+    // ArticleOfRecipeTag,ArticleOfItemTag,BookshelfArticleOfRecipe,BookshelfArticleOfItem
+
+    $user->delete();
+
+    return response()->json("削除しました。");
   }
 }

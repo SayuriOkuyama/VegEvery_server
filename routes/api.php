@@ -90,6 +90,7 @@ Route::prefix('user')
         Route::get('/{id}', 'getArticles')->name('getArticles');
         Route::put('/update/{id}', 'update')->name('update');
         Route::post('/password/reset/{id}', 'passwordReset')->name('passwordReset');
+        Route::delete('/delete/account/{id}', 'deleteAccount')->name('deleteFavorites');
       });
   });
 
