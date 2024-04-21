@@ -65,4 +65,14 @@ class ArticleOfItem extends Model
   {
     return $this->belongsToMany(Bookshelf::class, 'bookshelf_article_of_item');
   }
+
+  public static function boot()
+  {
+    parent::boot();
+
+    self::deleting(function ($articleOfItem) {
+      // 削除時の処理
+      $articleOfItem->likes()->delete();
+    });
+  }
 }
