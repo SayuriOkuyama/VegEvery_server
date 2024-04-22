@@ -1,6 +1,6 @@
 services:
   database:
-    image: postgres
+    image: groonga/pgroonga
     container_name: database
     restart: unless-stopped
     environment:
