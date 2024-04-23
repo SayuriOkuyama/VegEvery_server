@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Mockery\Undefined;
 
 class RecipeController extends Controller
 {
@@ -246,7 +247,7 @@ class RecipeController extends Controller
     $path = "";
     $url = "";
 
-    if ($request->thumbnail_path === "") {
+    if (!$request->thumbnail_path) {
       $path = Storage::putFile('recipes/thumbnail', $request->file('thumbnail_newFile'));
       $url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
     } else {
@@ -323,7 +324,11 @@ class RecipeController extends Controller
       for ($i = 0; $i < count($newSteps); $i++) {
         $path = "";
         $url = "";
-        if (isset($newSteps[$i]["file"])) {
+        Log::debug($newSteps[$i]["file"]);
+
+        if (isset($newSteps[$i]["file"]) && $newSteps[$i]["file"] != "undefined") {
+          Log::debug("ファイルあり");
+
           $path = Storage::putFile('recipes/step_images', $request->file('steps.' . $i . '.file'));
           $url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
         } elseif (!isset($newSteps[$i]["file"]) && $newSteps[$i]["url"] === "") {
@@ -343,6 +348,7 @@ class RecipeController extends Controller
         ]);
       }
     }
+    Log::debug($stepsData);
     Log::debug("第3ステップ完了");
 
     $tagsData = [];
