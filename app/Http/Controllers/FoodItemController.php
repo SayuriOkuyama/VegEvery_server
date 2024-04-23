@@ -235,7 +235,7 @@ class FoodItemController extends Controller
     $path = "";
     $url = "";
 
-    if ($request->thumbnail_path === "") {
+    if (!$request->thumbnail_path) {
       $path = Storage::putFile('items/thumbnail', $request->file('thumbnail_newFile'));
       $url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
     } else {
@@ -269,7 +269,7 @@ class FoodItemController extends Controller
     for ($i = 0; $i < count($request->reports); $i++) {
       $path = "";
       $url = "";
-      if (isset($request->reports[$i]["file"])) {
+      if (isset($request->reports[$i]["file"]) && $request->reports[$i]["file"] != "undefined") {
         $path = Storage::putFile('items/report_images', $request->file('reports.' . $i . '.file'));
         $url =  "https://static.vegevery.my-raga-bhakti.com/" . $path;
       } elseif (!isset($request->reports[$i]["file"]) && $request->reports[$i]["url"] === "") {
