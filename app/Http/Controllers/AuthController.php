@@ -275,7 +275,18 @@ class AuthController extends Controller
 
     $user->password = $request->password;
 
-    return response()->json("パスワードを変更しました。");
+    if ($request->secretQuestion) {
+      $user->secret_question = $request->secretQuestion;
+      $user->answer_to_secret_question = $request->secretAnswer;
+    }
+    $user->save();
+
+    $response = [
+      "message" => "パスワードを更新しました。",
+      "user" => $user
+    ];
+
+    return response()->json($response);
   }
 
   public function searchUser(Request $request)
@@ -309,7 +320,9 @@ class AuthController extends Controller
     // 画像削除が必要なモデル
     // ArticleOfRecipe,RecipeStep,ArticleOfItem,Report,Review,User
 
-    Storage::delete($user->icon_storage_path);
+    if ($user->icon_storage_path !== "user/icon_image/user_icon.png") {
+      Storage::delete($user->icon_storage_path);
+    }
 
     $ArticlesOfRecipe = ArticleOfRecipe::where("user_id", $id)->get();
 
