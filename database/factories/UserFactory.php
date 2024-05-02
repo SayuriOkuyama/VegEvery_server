@@ -25,10 +25,10 @@ class UserFactory extends Factory
   {
     $icon_storage_path = fake()->randomElement(
       [
-        "user/icon/IMG_3223.PNG",
-        "user/icon/outside.jpeg",
-        "user/icon/tabitha-turner-qtr0Lw4fMGc-unsplash.jpg",
-        "user/icon/user_icon.png",
+        "recipes/user_icon/IMG_3223.PNG",
+        "recipes/user_icon/outside.jpeg",
+        "recipes/user_icon/tabitha-turner-qtr0Lw4fMGc-unsplash.jpg",
+        "recipes/user_icon/user_icon.png",
       ]
     );
 
