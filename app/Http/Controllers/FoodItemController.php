@@ -272,7 +272,7 @@ class FoodItemController extends Controller
       if (isset($request->reports[$i]["file"]) && $request->reports[$i]["file"] != "undefined") {
         $path = Storage::putFile('items/report_images', $request->file('reports.' . $i . '.file'));
         $url =  "https://static.vegevery.my-raga-bhakti.com/" . $path;
-      } elseif (!isset($request->reports[$i]["file"]) && $request->reports[$i]["url"] === "") {
+      } elseif (!isset($request->reports[$i]["file"]) && (!isset($request->reports[$i]["url"]) || $request->reports[$i]["url"] === "")) {
         $path = "";
         $url = "";
       } else {
