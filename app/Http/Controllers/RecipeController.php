@@ -324,16 +324,20 @@ class RecipeController extends Controller
       for ($i = 0; $i < count($newSteps); $i++) {
         $path = "";
         $url = "";
-        Log::debug($newSteps[$i]["file"]);
 
+        // 新規ファイルあり
         if (isset($newSteps[$i]["file"]) && $newSteps[$i]["file"] != "undefined") {
           Log::debug("ファイルあり");
 
           $path = Storage::putFile('recipes/step_images', $request->file('steps.' . $i . '.file'));
           $url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
-        } elseif (!isset($newSteps[$i]["file"]) && $newSteps[$i]["url"] === "") {
+
+          // 画像なし
+        } elseif (!isset($newSteps[$i]["file"]) && (!isset($newSteps[$i]["url"]) || $newSteps[$i]["url"] === "")) {
           $path = "";
           $url = "";
+
+          // 前回の画像をそのまま使う
         } else {
           $path = $newSteps[$i]["path"];
           $url = $newSteps[$i]["url"];
