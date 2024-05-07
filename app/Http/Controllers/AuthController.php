@@ -300,7 +300,7 @@ class AuthController extends Controller
       $response = [
         "id" => $user->id,
         "question" => $user->secret_question,
-        "answer" => $user->secret_answer,
+        "answer" => $user->answer_to_secret_question,
       ];
     } else {
       $response = [
