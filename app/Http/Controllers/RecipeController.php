@@ -99,6 +99,7 @@ class RecipeController extends Controller
         "user_id" => $comment->user_id,
         "userName" => $user->name,
         "userIcon" => $user->icon_url,
+        "userIconPath" => $user->icon_storage_path,
         "text" => $comment->text,
         "likes" => $comment->number_of_likes
       ];
