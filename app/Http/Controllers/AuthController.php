@@ -75,10 +75,10 @@ class AuthController extends Controller
     $path = "";
     $url = "";
     if ($request->iconFile) {
-      $path = Storage::putFile('recipes/thumbnail', $request->file('iconFile'));
+      $path = Storage::putFile('user/icon', $request->file('iconFile'));
       $url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
-    } else if ($request->iconUrl === 'https://static.vegevery.my-raga-bhakti.com/user/icon_image/user_icon.png') {
-      $path = "user/icon_image/user_icon.png";
+    } else if ($request->iconUrl === 'https://static.vegevery.my-raga-bhakti.com/user/icon/user_icon.png') {
+      $path = "user/icon/user_icon.png";
       $url = $request->iconUrl;
     } else {
       // provider 情報から修正がない場合
@@ -202,12 +202,12 @@ class AuthController extends Controller
     $user = User::find($id);
 
     if ($request->icon_file) {
-      $path = Storage::putFile('user', $request->file('iconFile'));
+      $path = Storage::putFile('user/icon', $request->file('iconFile'));
       $user->icon_storage_path = $path;
       $user->icon_url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
     } else if (!$request->icon_url) {
-      $user->icon_storage_path = "user/icon_image/user_icon.png";
-      $user->icon_url = 'https://static.vegevery.my-raga-bhakti.com/user/icon_image/user_icon.png';
+      $user->icon_storage_path = "/user/icon/user_icon.png";
+      $user->icon_url = 'https://static.vegevery.my-raga-bhakti.com/user/icon/user_icon.png';
     }
 
     $vegetarian_type = [
