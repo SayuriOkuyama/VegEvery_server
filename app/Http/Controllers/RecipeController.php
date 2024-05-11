@@ -24,14 +24,13 @@ class RecipeController extends Controller
    */
   public function index(Request $request): JsonResponse
   {
-    $request->page ? $page = $request->page : "";
+    $page = $request->page ? $request->page : "";
     if ($page === 'top') {
       $articles = ArticleOfRecipe::with('user')->orderBy('number_of_likes', 'desc')->take(6)->get();
       return response()->json($articles, 200);
-    } else {
-      $articles = ArticleOfRecipe::with('user')->orderBy('number_of_likes', 'desc')->paginate(20);
-      return response()->json($articles, 200);
     }
+    $articles = ArticleOfRecipe::with('user')->orderBy('number_of_likes', 'desc')->paginate(20);
+    return response()->json($articles, 200);
   }
 
   /**
@@ -39,43 +38,41 @@ class RecipeController extends Controller
    */
   public function search(Request $request): JsonResponse
   {
-    $request->search ? $keyword = $request->search : "";
-    $request->type ? $vegeTag = $request->type : "";
+    $keyword = $request->search ? $request->search : "";
+    $vegeTag = $request->type ? $request->type : "";
     Log::debug($request);
     Log::debug($keyword);
     Log::debug($vegeTag);
     if (!$keyword || $keyword == "null") {
-      if ($vegeTag !== "null" || !$vegeTag) {
+      if ($vegeTag !== "null") {
         $articles = ArticleOfRecipe::with('user')->where([$vegeTag => true])
           ->orderBy('updated_at', 'desc')->paginate(20);
         return response()->json($articles, 200);
-      } else {
-        $articles = ArticleOfRecipe::with('user')->where(["vegan" => true])
-          ->orderBy('updated_at', 'desc')->paginate(20);
-        return response()->json($articles, 200);
       }
-    } else {
-      $searchedArticles = ArticleOfRecipe::orWhereRaw("title &@~ ?", [$keyword])->get();
-      $searchedMaterials = Material::orWhereRaw("name &@~ ?", [$keyword])->get();
-      $searchedSteps = RecipeStep::orWhereRaw("text &@~ ?", [$keyword])->get();
-      $searchedTags = Tag::orWhereRaw("name &@~ ?", [$keyword])
-        ->with("articlesOfRecipe")->get();
-
-      $articleIds = $searchedArticles->pluck('id')->toArray();
-      $articleIdsFromMaterials = $searchedMaterials->pluck('article_id')->toArray();
-      $articleIdsFromSteps = $searchedSteps->pluck('article_id')->toArray();
-      $articleIdsFromTags = $searchedTags->pluck('id')->toArray();
-
-      $uniqueIds = array_unique(array_merge(
-        $articleIds,
-        $articleIdsFromMaterials,
-        $articleIdsFromSteps,
-        $articleIdsFromTags
-      ));
-      $uniqueSearchedArticles = ArticleOfRecipe::with('user')->whereIn('id', $uniqueIds)
-        ->where([$vegeTag => true])->orderBy('updated_at', 'desc')->paginate(20);
-      return response()->json($uniqueSearchedArticles, 200);
+      $articles = ArticleOfRecipe::with('user')->where(["vegan" => true])
+        ->orderBy('updated_at', 'desc')->paginate(20);
+      return response()->json($articles, 200);
     }
+    $searchedArticles = ArticleOfRecipe::orWhereRaw("title &@~ ?", [$keyword])->get();
+    $searchedMaterials = Material::orWhereRaw("name &@~ ?", [$keyword])->get();
+    $searchedSteps = RecipeStep::orWhereRaw("text &@~ ?", [$keyword])->get();
+    $searchedTags = Tag::orWhereRaw("name &@~ ?", [$keyword])
+      ->with("articlesOfRecipe")->get();
+
+    $articleIds = $searchedArticles->pluck('id')->toArray();
+    $articleIdsFromMaterials = $searchedMaterials->pluck('article_id')->toArray();
+    $articleIdsFromSteps = $searchedSteps->pluck('article_id')->toArray();
+    $articleIdsFromTags = $searchedTags->pluck('id')->toArray();
+
+    $uniqueIds = array_unique(array_merge(
+      $articleIds,
+      $articleIdsFromMaterials,
+      $articleIdsFromSteps,
+      $articleIdsFromTags
+    ));
+    $uniqueSearchedArticles = ArticleOfRecipe::with('user')->whereIn('id', $uniqueIds)
+      ->where([$vegeTag => true])->orderBy('updated_at', 'desc')->paginate(20);
+    return response()->json($uniqueSearchedArticles, 200);
   }
 
   /**
@@ -244,16 +241,20 @@ class RecipeController extends Controller
     Log::debug($request);
     $article = ArticleOfRecipe::with('user', 'materials')->where('id', $id)->first();
 
-    $path = "";
-    $url = "";
+    $path = !$request->thumbnail_path ?
+      Storage::putFile('recipes/thumbnail', $request->file('thumbnail_newFile')) :
+      $request->thumbnail_path;
+    $url = !$request->thumbnail_path ?
+      "https://static.vegevery.my-raga-bhakti.com/" . $path :
+      $request->thumbnail_url;
 
-    if (!$request->thumbnail_path) {
-      $path = Storage::putFile('recipes/thumbnail', $request->file('thumbnail_newFile'));
-      $url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
-    } else {
-      $path = $request->thumbnail_path;
-      $url = $request->thumbnail_url;
-    }
+    // if (!$request->thumbnail_path) {
+    //   $path = Storage::putFile('recipes/thumbnail', $request->file('thumbnail_newFile'));
+    //   $url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
+    // } else {
+    //   $path = $request->thumbnail_path;
+    //   $url = $request->thumbnail_url;
+    // }
 
     $article->title = $request->title;
     $article->cooking_time = $request->time;
@@ -289,21 +290,28 @@ class RecipeController extends Controller
         $oldMaterials[$i]->name = $newMaterials[$i]["name"];
         $oldMaterials[$i]->quantity = $newMaterials[$i]["quantity"];
         $oldMaterials[$i]->unit = $newMaterials[$i]["unit"];
-      } else {
-        if (isset($newMaterials[$i])) {
-          Log::debug("新しい材料あり");
-          $materialsData[] = Material::create([
-            "article_of_recipe_id" => $article->id,
-            "name" => $newMaterials[$i]["name"],
-            "quantity" => $newMaterials[$i]['quantity'],
-            "unit" => $newMaterials[$i]['unit'],
-          ]);
-        }
-        if (isset($oldMaterials[$i])) {
-          $oldMaterials[$i]->delete();
-        }
+      } elseif (isset($newMaterials[$i]) && isset($oldMaterials[$i])) {
+        Log::debug("新しい材料あり");
+        $materialsData[] = Material::create([
+          "article_of_recipe_id" => $article->id,
+          "name" => $newMaterials[$i]["name"],
+          "quantity" => $newMaterials[$i]['quantity'],
+          "unit" => $newMaterials[$i]['unit'],
+        ]);
+        $oldMaterials[$i]->delete();
+      } elseif (isset($newMaterials[$i])) {
+        Log::debug("新しい材料あり");
+        $materialsData[] = Material::create([
+          "article_of_recipe_id" => $article->id,
+          "name" => $newMaterials[$i]["name"],
+          "quantity" => $newMaterials[$i]['quantity'],
+          "unit" => $newMaterials[$i]['unit'],
+        ]);
+      } elseif (isset($oldMaterials[$i])) {
+        $oldMaterials[$i]->delete();
       }
     }
+
     Log::debug("第２ステップ完了");
 
     $oldSteps = RecipeStep::where('article_of_recipe_id', $article->id)->get();
@@ -321,8 +329,9 @@ class RecipeController extends Controller
 
     if ($newSteps) {
       for ($i = 0; $i < count($newSteps); $i++) {
-        $path = "";
-        $url = "";
+        // 前回の画像をそのまま使う
+        $path = $newSteps[$i]["path"] ? $newSteps[$i]["path"] : "";
+        $url = $newSteps[$i]["url"] ? $newSteps[$i]["url"] : "";
 
         // 新規ファイルあり
         if (isset($newSteps[$i]["file"]) && $newSteps[$i]["file"] != "undefined") {
@@ -335,11 +344,6 @@ class RecipeController extends Controller
         } elseif (!isset($newSteps[$i]["file"]) && (!isset($newSteps[$i]["url"]) || $newSteps[$i]["url"] === "")) {
           $path = "";
           $url = "";
-
-          // 前回の画像をそのまま使う
-        } else {
-          $path = $newSteps[$i]["path"];
-          $url = $newSteps[$i]["url"];
         }
 
         $stepsData[] = RecipeStep::create([
@@ -366,9 +370,8 @@ class RecipeController extends Controller
 
     if ($request->tags) {
       foreach ($request->tags as $newTag) {
-        Log::debug($newTag);
         if ($newTag !== null) {
-          $tag_data = Tag::firstOrCreate(['name' => $newTag]);
+          $tag_data = Tag::firstOrCreate(['name' => $newTag["name"]]);
           $tagsData[] = $tag_data;
 
           $articleTagsData[] = ArticleOfRecipeTag::firstOrCreate([

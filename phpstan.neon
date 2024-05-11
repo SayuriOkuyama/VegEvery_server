@@ -11,3 +11,6 @@ parameters:
     - storage
     - migrations
   checkGenericClassInNonGenericObjectType: false
+  ignoreErrors:
+    - '#Call to an undefined method Laravel\\Socialite\\Contracts\\Provider::stateless\(\)#'
+    - '#Call to an undefined method Laravel\\Sanctum\\Contracts\\HasAbilities::delete\(\)#'
