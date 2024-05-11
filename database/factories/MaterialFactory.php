@@ -19,7 +19,7 @@ class MaterialFactory extends Factory
   {
     return [
       'name' => fake()->word(),
-      'quantity' => fake()->numberBetween($min = 1, $max = 100),
+      'quantity' => fake()->numberBetween(1, 100),
       'unit' => fake()->randomElement(['杯（小さじ）', '杯（大さじ）', '本', '枚', '個', '片', 'カップ', 'cc', 'mL', 'L', 'g', 'mg', "袋"]),
       'article_of_recipe_id' => ArticleOfRecipe::factory()
     ];

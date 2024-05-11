@@ -18,14 +18,14 @@ class AuthUserTest extends TestCase
    * トークンがないと（ログアウト状態）認証エラーになることの確認
    * @return void
    */
-  public function test_get_auth_user_with_no_token_トークンがないと認証エラーになる(): void
+  public function testGetAuthUserWithNoToken(): void
   {
     $response = $this->getJson('/api/user/');
 
     $response->assertStatus(401);
   }
 
-  public function test_an_action_that_requires_authentication_ログインしていると認証エラーにならい(): void
+  public function testAnActionThatRequiresAuthentication(): void
   {
     $user = User::factory()->create();
 

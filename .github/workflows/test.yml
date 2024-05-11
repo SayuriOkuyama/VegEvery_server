@@ -1,0 +1,44 @@
+name: Test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .env
+        run: |
+          touch .env &&
+          cp .env.example .env &&
+          echo "DB_CONNECTION=${{ secrets.DB_CONNECTION }}" >> .env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+          echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> .env
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+
+      - name: Set up .env.testing
+        run: echo "${{ secrets.ENV_TESTING }}" > .env.testing
+
+      - name: Set up Docker Compose
+        run: docker compose up -d --build
+
+      - name: Run commands inside the container
+        run: |
+          docker compose exec laravel /bin/bash -c "
+            composer update &&
+            composer install &&
+            php artisan key:generate &&
+            php artisan migrate &&
+            php artisan app:import-csv &&
+            php artisan test &&
+            composer phpcs
+          "

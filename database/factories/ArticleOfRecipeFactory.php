@@ -17,21 +17,21 @@ class ArticleOfRecipeFactory extends Factory
    */
   public function definition(): array
   {
-    $thumbnail_path = fake()->randomElement([
+    $thumbnailPath = fake()->randomElement([
       "recipes/thumbnail/brooke-lark-kXQ3J7_2fpc-unsplash.jpg",
       "recipes/thumbnail/haseeb-jamil-J9lD6FS6_cs-unsplash.jpg",
       "recipes/thumbnail/victoria-shes-4MEL9XS-3JQ-unsplash.jpg"
     ]);
 
-    $thumbnail_url = "https://static.vegevery.my-raga-bhakti.com/" . $thumbnail_path;
+    $thumbnailUrl = "https://static.vegevery.my-raga-bhakti.com/" . $thumbnailPath;
 
 
     return [
-      'title' => fake()->realText($maxNbChars = 20),
-      'thumbnail_path' => $thumbnail_path,
-      'thumbnail_url' => $thumbnail_url,
+      'title' => fake()->realText(20),
+      'thumbnail_path' => $thumbnailPath,
+      'thumbnail_url' => $thumbnailUrl,
       'cooking_time' => fake()->randomElement([10, 15, 20, 30, 40, 50, 60]),
-      'number_of_likes' => fake()->numberBetween($min = 0, $max = 500),
+      'number_of_likes' => fake()->numberBetween(0, 500),
       'servings' => fake()->randomElement(["1", "2", "3", "4"]),
       'vegan' => fake()->randomElement([true, false]),
       'oriental_vegetarian' => fake()->randomElement([true, false]),

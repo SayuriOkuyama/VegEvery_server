@@ -25,7 +25,7 @@ class ImportCsv extends Command
   /**
    * コンソールコマンドを実行します
    */
-  public function handle()
+  public function handle(): void
   {
     // ファイル名の配列
     $tables = [
@@ -43,18 +43,17 @@ class ImportCsv extends Command
       foreach ($tables as $table) {
         Log::debug($table);
         // CSVファイルを開く
-        if (($handle = fopen("database/dummy/$table.csv", "r")) !== FALSE) {
+        $handle = fopen("database/dummy/$table.csv", "r");
+        if ($handle !== false) {
           // CSVの1行目（カラム名）を読み込む
           $columns = fgetcsv($handle, 1000, ",");
 
           $countRow = 0;
           // CSVファイルの2行目移行の各行を読み込む
-          while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+          while (($data = fgetcsv($handle, 1000, ",")) !== false) {
             $countRow++;
             Log::debug("row: $countRow");
             if ($data) {
-              Log::debug(count($columns));
-              Log::debug(count($data));
               // カラム名(キー)とデータ(値)を組み合わせて連想配列を作成
               $record = array_combine($columns, $data);
 

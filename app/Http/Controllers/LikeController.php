@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\ArticleOfRecipe;
 use App\Models\Like;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class LikeController extends Controller
 {
-  public function update(Request $request, string $id)
+  public function update(Request $request, string $id): JsonResponse
   {
     Log::debug($request);
     $like = !$request->like;

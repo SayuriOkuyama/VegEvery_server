@@ -26,11 +26,12 @@
     "laravel/sail": "^1.18",
     "mockery/mockery": "^1.4.4",
     "nunomaduro/collision": "^7.0",
+    "nunomaduro/larastan": "^2.9",
+    "phpmd/phpmd": "@stable",
+    "phpstan/phpstan": "@stable",
     "phpunit/phpunit": "^10.1",
     "spatie/laravel-ignition": "^2.0",
-    "squizlabs/php_codesniffer": "3.*",
-    "phpmd/phpmd": "@stable",
-    "phpstan/phpstan": "@stable"
+    "squizlabs/php_codesniffer": "3.*"
   },
   "autoload": {
     "psr-4": {
@@ -65,7 +66,7 @@
       "./vendor/bin/phpmd . text phpmd.xml --suffixes php"
     ],
     "phpstan": [
-      "./vendor/bin/phpstan analyse -c phpstan.neon"
+      "./vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=256M"
     ]
   },
   "extra": {

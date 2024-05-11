@@ -9,6 +9,7 @@ use App\Models\BookshelfArticleOfItem;
 use App\Models\BookshelfArticleOfRecipe;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class BookshelfController extends Controller
 {
-  public function getBookshelves(string $id)
+  public function getBookshelves(string $id): JsonResponse
   {
     Log::debug("getBookshelves");
     Log::debug($id);
@@ -26,7 +27,7 @@ class BookshelfController extends Controller
     return response()->json($bookshelves);
   }
 
-  public function create(string $id, Request $request)
+  public function create(string $id, Request $request): JsonResponse
   {
     Log::debug("create");
 
@@ -38,7 +39,7 @@ class BookshelfController extends Controller
     return response()->json($bookshelf);
   }
 
-  public function getBookshelfArticles(string $id)
+  public function getBookshelfArticles(string $id): JsonResponse
   {
     Log::debug("getBookshelfArticles");
     $bookshelf = Bookshelf::find($id);
@@ -75,7 +76,7 @@ class BookshelfController extends Controller
     return response()->json($response);
   }
 
-  public function storeArticle(Request $request)
+  public function storeArticle(Request $request): JsonResponse
   {
     Log::debug("storeArticle");
 
@@ -96,7 +97,7 @@ class BookshelfController extends Controller
     }
   }
 
-  public function deleteFavorites(string $id, Request $request)
+  public function deleteFavorites(string $id, Request $request): JsonResponse
   {
     Log::debug("deleteFavorites");
     Log::debug($request);
@@ -120,7 +121,7 @@ class BookshelfController extends Controller
     return response()->json("削除しました");
   }
 
-  public function deleteBookshelf(string $id)
+  public function deleteBookshelf(string $id): JsonResponse
   {
     Log::debug("deleteBookshelf");
 

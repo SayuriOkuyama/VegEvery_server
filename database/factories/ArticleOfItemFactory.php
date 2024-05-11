@@ -17,19 +17,19 @@ class ArticleOfItemFactory extends Factory
    */
   public function definition(): array
   {
-    $thumbnail_path = fake()->randomElement([
+    $thumbnailPath = fake()->randomElement([
       "items/thumbnail/brooke-lark-kXQ3J7_2fpc-unsplash.jpg",
       "items/thumbnail/haseeb-jamil-J9lD6FS6_cs-unsplash.jpg",
       "items/thumbnail/victoria-shes-4MEL9XS-3JQ-unsplash.jpg"
     ]);
 
-    $thumbnail_url = "https://static.vegevery.my-raga-bhakti.com/" . $thumbnail_path;
+    $thumbnailUrl = "https://static.vegevery.my-raga-bhakti.com/" . $thumbnailPath;
 
     return [
-      'title' => fake()->realText($maxNbChars = 20),
-      'thumbnail_path' => $thumbnail_path,
-      'thumbnail_url' => $thumbnail_url,
-      'number_of_likes' => fake()->numberBetween($min = 0, $max = 500),
+      'title' => fake()->realText(20),
+      'thumbnail_path' => $thumbnailPath,
+      'thumbnail_url' => $thumbnailUrl,
+      'number_of_likes' => fake()->numberBetween(0, 500),
       'vegan' => fake()->randomElement([true, false]),
       'oriental_vegetarian' => fake()->randomElement([true, false]),
       'ovo_vegetarian' => fake()->randomElement([true, false]),

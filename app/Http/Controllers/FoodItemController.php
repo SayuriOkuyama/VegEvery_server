@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Models\BookshelfArticleOfItem;
 use App\Models\Like;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -21,7 +22,7 @@ class FoodItemController extends Controller
   /**
    * 人気順 にレシピ記事を返す
    */
-  public function index(Request $request)
+  public function index(Request $request): JsonResponse
   {
     $page = $request->page;
     if ($page === 'top') {
@@ -36,7 +37,7 @@ class FoodItemController extends Controller
   /**
    * ワード検索
    */
-  public function search(Request $request)
+  public function search(Request $request): JsonResponse
   {
     Log::debug("search");
 
@@ -80,7 +81,7 @@ class FoodItemController extends Controller
   /**
    * 個別記事検索
    */
-  public function get(string $id)
+  public function get(string $id): JsonResponse
   {
     $article = ArticleOfItem::with('user', 'items', 'reports', 'commentsToItem', 'tags')->where('id', $id)->first();
 
@@ -112,7 +113,7 @@ class FoodItemController extends Controller
   /**
    * 新規投稿保存
    */
-  public function store(Request $request)
+  public function store(Request $request): JsonResponse
   {
     Log::debug($request);
     $path = Storage::putFile('items/thumbnail', $request->file('thumbnail'));
@@ -174,13 +175,12 @@ class FoodItemController extends Controller
     foreach ($request->tags as $tag) {
       Log::debug($tag["name"]);
       if ($tag["name"] !== "") {
-
-        $tag_data = Tag::firstOrCreate(['name' => $tag["name"]]);
-        $tagsData[] = $tag_data;
+        $tagData = Tag::firstOrCreate(['name' => $tag["name"]]);
+        $tagsData[] = $tagData;
 
         $articleTagsData[] = ArticleOfItemTag::create([
           'article_of_item_id' => $article->id,
-          'tag_id' => $tag_data->id
+          'tag_id' => $tagData->id
         ]);
       }
     }
@@ -200,7 +200,7 @@ class FoodItemController extends Controller
   /**
    * コメント投稿
    */
-  public function commentStore(Request $request, string $id)
+  public function commentStore(Request $request, string $id): JsonResponse
   {
     Log::debug($request);
     Log::debug($id);
@@ -228,7 +228,7 @@ class FoodItemController extends Controller
   /**
    * 投稿記事更新
    */
-  public function update(Request $request, string $id)
+  public function update(Request $request, string $id): JsonResponse
   {
     Log::debug($request);
     $article = ArticleOfItem::with('user', "items")->where('id', $id)->first();
@@ -273,7 +273,15 @@ class FoodItemController extends Controller
       if (isset($request->reports[$i]["file"]) && $request->reports[$i]["file"] != "undefined") {
         $path = Storage::putFile('items/report_images', $request->file('reports.' . $i . '.file'));
         $url =  "https://static.vegevery.my-raga-bhakti.com/" . $path;
-      } elseif (!isset($request->reports[$i]["file"]) && (!isset($request->reports[$i]["url"]) || $request->reports[$i]["url"] === "")) {
+      } elseif (
+        !isset(
+          $request->reports[$i]["file"]
+        )
+        && (
+          !isset($request->reports[$i]["url"])
+          || $request->reports[$i]["url"] === ""
+        )
+      ) {
         $path = "";
         $url = "";
       } else {
@@ -292,11 +300,11 @@ class FoodItemController extends Controller
 
     $tagsData = [];
     $articleTagsData = [];
-    $article_tags = ArticleOfItemTag::where(['article_of_item_id' => $article->id])->get();
+    $articleTags = ArticleOfItemTag::where(['article_of_item_id' => $article->id])->get();
 
-    if ($article_tags != null) {
-      foreach ($article_tags as $article_tag) {
-        $article_tag->delete();
+    if ($articleTags != null) {
+      foreach ($articleTags as $articleTag) {
+        $articleTag->delete();
       }
     }
     Log::debug("ステップ3完了");
@@ -349,7 +357,7 @@ class FoodItemController extends Controller
   /**
    * Remove the specified resource from storage.
    */
-  public function delete(string $id)
+  public function delete(string $id): JsonResponse
   {
     Log::debug($id);
     Report::where("article_of_item_id", $id)->delete();
@@ -369,7 +377,7 @@ class FoodItemController extends Controller
   /**
    * コメント削除
    */
-  public function commentDelete(Request $request)
+  public function commentDelete(Request $request): JsonResponse
   {
     Log::debug($request);
     CommentToItem::find($request->id)->delete();

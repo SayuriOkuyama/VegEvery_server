@@ -11,6 +11,7 @@ use App\Models\Report;
 use App\Models\Review;
 use App\Models\SocialAccount;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -32,7 +33,31 @@ class AuthController extends Controller
     Log::debug("getUser");
     $user = User::find($id);
 
-    return response()->json($user);
+    $vegeTypes = [
+      'vegan',
+      'oriental_vegetarian',
+      'ovo_vegetarian',
+      'pescatarian',
+      'lacto_vegetarian',
+      'pollo_vegetarian',
+      'fruitarian',
+      'other_vegetarian',
+    ];
+    foreach ($vegeTypes as $key => $vegeType) {
+      if ($vegeType === $user->vegetarian_type) {
+        $vegeTypes[$key] = true;
+      } else {
+        $vegeTypes[$key] = false;
+      }
+    }
+    Log::debug($vegeTypes);
+
+    $response = [
+      "user" => $user,
+      "vegeType" => $vegeTypes
+    ];
+
+    return response()->json($response);
   }
 
   /**
@@ -77,7 +102,7 @@ class AuthController extends Controller
     if ($request->iconFile) {
       $path = Storage::putFile('user/icon', $request->file('iconFile'));
       $url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
-    } else if ($request->iconUrl === 'https://static.vegevery.my-raga-bhakti.com/user/icon/user_icon.png') {
+    } elseif ($request->iconUrl === 'https://static.vegevery.my-raga-bhakti.com/user/icon/user_icon.png') {
       $path = "user/icon/user_icon.png";
       $url = $request->iconUrl;
     } else {
@@ -164,7 +189,6 @@ class AuthController extends Controller
 
       // 普通のログインの場合
     } else {
-
       $request->validate([
         'account_id' => 'required|string',
         'password' => 'required',
@@ -202,11 +226,11 @@ class AuthController extends Controller
     $user = User::find($id);
 
     if ($request->icon_file) {
-      $path = Storage::putFile('user/icon', $request->file('iconFile'));
+      $path = Storage::putFile('user/icon', $request->file('icon_file'));
       $user->icon_storage_path = $path;
       $user->icon_url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
-    } else if (!$request->icon_url) {
-      $user->icon_storage_path = "/user/icon/user_icon.png";
+    } elseif (!$request->icon_url) {
+      $user->icon_storage_path = "user/icon/user_icon.png";
       $user->icon_url = 'https://static.vegevery.my-raga-bhakti.com/user/icon/user_icon.png';
     }
 
@@ -239,7 +263,7 @@ class AuthController extends Controller
    * 新規登録、ログイン共通
    * ソーシャルアカウントが登録済みか確認
    */
-  public function callback(string $provider, Request $request)
+  public function callback(string $provider, Request $request): JsonResponse
   {
     Log::debug($request);
     Log::debug($provider);
@@ -252,7 +276,6 @@ class AuthController extends Controller
 
     $response = "";
     if ($registeredSocialAccount) {
-
       $response = [
         "message" => "registered",
         "socialAccountId" => $registeredSocialAccount->provider_id
@@ -266,7 +289,7 @@ class AuthController extends Controller
     return response()->json($response);
   }
 
-  public function passwordReset(string $id, Request $request)
+  public function passwordReset(string $id, Request $request): JsonResponse
   {
     Log::debug("passwordReset");
     Log::debug($request);
@@ -289,7 +312,7 @@ class AuthController extends Controller
     return response()->json($response);
   }
 
-  public function searchUser(Request $request)
+  public function searchUser(Request $request): JsonResponse
   {
     Log::debug("searchUser");
     Log::debug($request->id);
@@ -311,7 +334,7 @@ class AuthController extends Controller
     return response()->json($response);
   }
 
-  public function deleteAccount(string $id)
+  public function deleteAccount(string $id): JsonResponse
   {
     Log::debug("deleteAccount");
 
@@ -335,12 +358,12 @@ class AuthController extends Controller
       }
     }
 
-    $ArticlesOfItem = ArticleOfItem::where("user_id", $id)->get();
+    $articlesOfItem = ArticleOfItem::where("user_id", $id)->get();
 
-    foreach ($ArticlesOfItem as $ArticleOfItem) {
-      Storage::delete($ArticleOfItem->thumbnail_path);
+    foreach ($articlesOfItem as $articleOfItem) {
+      Storage::delete($articleOfItem->thumbnail_path);
 
-      $reports = Report::where("article_of_item_id", $ArticleOfItem->id)->get();
+      $reports = Report::where("article_of_item_id", $articleOfItem->id)->get();
       foreach ($reports as $report) {
         Storage::delete($report->image_path);
       }
