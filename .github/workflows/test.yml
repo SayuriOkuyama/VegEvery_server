@@ -14,16 +14,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-
-      - name: Validate composer.json and composer.lock
-        run: composer validate
+      - name: Set up Docker Compose
+        run: docker compose up -d && docker composer exec laravel /bin/bash
 
       - uses: ramsey/composer-install@2.2.0
 
       - name: APP_KEY generate
         run: touch .env && cp .env.example .env && php artisan key:generate
+
+      - name: Set up .env
+        run: |
+          echo "DB_CONNECTION=${{ secrets.DB_CONNECTION }}" >> .env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+          echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> .env
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
 
       - name: Set up .env.testing
         run: echo "${{ secrets.ENV_TESTING }}" > .env.testing
