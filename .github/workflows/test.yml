@@ -25,6 +25,9 @@ jobs:
       - name: APP_KEY generate
         run: touch .env && cp .env.example .env && php artisan key:generate
 
+      - name: Set up .env.testing
+        run: echo "${{ secrets.ENV_TESTING }}" > .env.testing
+
       - name: Run tests with PHPUnit
         run: php artisan test
 
