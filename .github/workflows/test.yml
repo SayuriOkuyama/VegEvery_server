@@ -29,7 +29,7 @@ jobs:
         run: echo "${{ secrets.ENV_TESTING }}" > .env.testing
 
       - name: Set up Docker Compose
-        run: docker compose up -d
+        run: docker compose up -d --build
 
       - name: Run commands inside the container
         run: |
@@ -37,6 +37,8 @@ jobs:
             composer update &&
             composer install &&
             php artisan key:generate &&
+            php artisan migrate &&
+            php artisan app:import-csv &&
             php artisan test &&
             composer phpcs
           "
