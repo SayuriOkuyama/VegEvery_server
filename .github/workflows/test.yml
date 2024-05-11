@@ -14,46 +14,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Docker Compose
+      - name: Set up .env
         run: |
-          docker compose up -d
+          touch .env &&
+          cp .env.example .env &&
+          echo "DB_CONNECTION=${{ secrets.DB_CONNECTION }}" >> .env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+          echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> .env
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+
+      - name: Set up .env.testing
+        run: echo "${{ secrets.ENV_TESTING }}" > .env.testing
+
+      - name: Set up Docker Compose
+        run: docker compose up -d
 
       - name: Run commands inside the container
         run: |
           docker compose exec laravel /bin/bash -c "
             composer update &&
             composer install &&
-            touch .env &&
-            cp .env.example .env &&
             php artisan key:generate &&
-            echo 'DB_CONNECTION=${{ secrets.DB_CONNECTION }}' >> .env &&
-            echo 'DB_HOST=${{ secrets.DB_HOST }}' >> .env &&
-            echo 'DB_PORT=${{ secrets.DB_PORT }}' >> .env &&
-            echo 'DB_DATABASE=${{ secrets.DB_DATABASE }}' >> .env &&
-            echo 'DB_USERNAME=${{ secrets.DB_USERNAME }}' >> .env &&
-            echo 'DB_PASSWORD=${{ secrets.DB_PASSWORD }}' >> .env &&
-            echo '${{ secrets.ENV_TESTING }}' > .env.testing &&
             php artisan test &&
             composer phpcs
           "
-
-      # - name: APP_KEY generate
-      #   run: touch .env && cp .env.example .env && php artisan key:generate
-
-      # - name: Set up .env
-      #   run: |
-      #     echo "DB_CONNECTION=${{ secrets.DB_CONNECTION }}" >> .env
-      #     echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
-      #     echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
-      #     echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> .env
-      #     echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
-      #     echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-
-      # - name: Set up .env.testing
-      #   run: echo "${{ secrets.ENV_TESTING }}" > .env.testing
-
-      # - name: Run tests with PHPUnit
-      #   run: php artisan test
-
-      # - name: Check coding standards with PHP_CodeSniffer
-      #   run: composer phpcs
