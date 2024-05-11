@@ -22,13 +22,13 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
-  public function index(Request $request)
+  public function index(Request $request): JsonResponse
   {
     Log::debug($request->user());
-    return $request->user();
+    return response()->json($request->user());
   }
 
-  public function getUser(string $id)
+  public function getUser(string $id): JsonResponse
   {
     Log::debug("getUser");
     $user = User::find($id);
@@ -44,10 +44,9 @@ class AuthController extends Controller
       'other_vegetarian',
     ];
     foreach ($vegeTypes as $key => $vegeType) {
+      $vegeTypes[$key] = false;
       if ($vegeType === $user->vegetarian_type) {
         $vegeTypes[$key] = true;
-      } else {
-        $vegeTypes[$key] = false;
       }
     }
     Log::debug($vegeTypes);
@@ -63,20 +62,19 @@ class AuthController extends Controller
   /**
    * ユーザー個人のレシピ記事を返す
    */
-  public function getUserArticles(string $id, Request $request)
+  public function getUserArticles(string $id, Request $request): JsonResponse
   {
     Log::debug("getUserArticles");
     Log::debug($request);
     if ($request->articleType === "recipes") {
       $articles = ArticleOfRecipe::with('user')->where("user_id", $id)->orderBy('updated_at', 'desc')->paginate(20);
       return response()->json($articles, 200);
-    } else {
-      $articles = ArticleOfItem::with('user')->where("user_id", $id)->orderBy('updated_at', 'desc')->paginate(20);
-      return response()->json($articles, 200);
     }
+    $articles = ArticleOfItem::with('user')->where("user_id", $id)->orderBy('updated_at', 'desc')->paginate(20);
+    return response()->json($articles, 200);
   }
 
-  public function getArticles()
+  public function getArticles(): JsonResponse
   {
     $user = Auth::user();
 
@@ -92,22 +90,18 @@ class AuthController extends Controller
     return response()->json($response);
   }
 
-  public function register(Request $request)
+  public function register(Request $request): JsonResponse
   {
     Log::debug("Auth-register");
     Log::debug($request);
 
     $path = "";
-    $url = "";
+    $url = $request->iconUrl;
     if ($request->iconFile) {
       $path = Storage::putFile('user/icon', $request->file('iconFile'));
       $url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
     } elseif ($request->iconUrl === 'https://static.vegevery.my-raga-bhakti.com/user/icon/user_icon.png') {
       $path = "user/icon/user_icon.png";
-      $url = $request->iconUrl;
-    } else {
-      // provider 情報から修正がない場合
-      $path = "";
       $url = $request->iconUrl;
     }
 
@@ -131,18 +125,22 @@ class AuthController extends Controller
         "provider_id" => $request->providerId
       ]);
       Log::debug($social);
-    } else {
-      $user = User::create([
-        "account_id" => $request->account_id,
-        'name' => $request->name,
-        'password' => $request->password,
-        'secret_question' => $request->secretQuestion,
-        'answer_to_secret_question' => $request->secretAnswer,
-        'vegetarian_type' => $request->vegeType,
-        'icon_url' => $url,
-        'icon_storage_path' => $path
-      ]);
+
+      $token = $user->createToken('sanctum_token')->plainTextToken;
+
+      return response()->json(['token' => $token, "user" => $user], 200);
     }
+
+    $user = User::create([
+      "account_id" => $request->account_id,
+      'name' => $request->name,
+      'password' => $request->password,
+      'secret_question' => $request->secretQuestion,
+      'answer_to_secret_question' => $request->secretAnswer,
+      'vegetarian_type' => $request->vegeType,
+      'icon_url' => $url,
+      'icon_storage_path' => $path
+    ]);
 
     Log::debug($user);
     // Laravel Sanctumのトークンを発行
@@ -155,7 +153,7 @@ class AuthController extends Controller
   /**
    * アカウント ID が使用可能か確認
    */
-  public function checkAccountId(Request $request)
+  public function checkAccountId(Request $request): JsonResponse
   {
     Log::debug($request);
     $result = User::where('account_id', $request->id)->first();
@@ -168,49 +166,47 @@ class AuthController extends Controller
   }
 
 
-  public function login(Request $request)
+  public function login(Request $request): JsonResponse
   {
     Log::debug("Auth-login");
     Log::debug($request);
 
     // social ログインの場合
     if ($request->provider) {
-      $social_account = SocialAccount::where([
+      $socialAccount = SocialAccount::where([
         ['provider_id', '=', $request->providerId],
         ['provider', '=', $request->provider],
       ])->first();
 
-      $user = User::find($social_account->user_id);
+      $user = User::find($socialAccount->user_id);
 
       // Laravel Sanctumのトークンを発行
       $token = $user->createToken('sanctum_token')->plainTextToken;
 
       return response()->json(['token' => $token, "user" => $user], 200);
-
-      // 普通のログインの場合
-    } else {
-      $request->validate([
-        'account_id' => 'required|string',
-        'password' => 'required',
-      ]);
-
-      $user = User::where('account_id', $request->account_id)->first();
-
-      if (!$user || !Hash::check($request->password, $user->password)) {
-        return response()->json([
-          'errors' => [
-            'login' => ['IDかパスワードが間違っています']
-          ]
-        ], 422);
-      }
-
-      $token = $user->createToken('sanctum_token')->plainTextToken;
-      Log::debug(['token' => $token, 'user' => $user]);
-      return response()->json(['token' => $token, 'user' => $user], 200);
     }
+    // 普通のログインの場合
+    $request->validate([
+      'account_id' => 'required|string',
+      'password' => 'required',
+    ]);
+
+    $user = User::where('account_id', $request->account_id)->first();
+
+    if (!$user || !Hash::check($request->password, $user->password)) {
+      return response()->json([
+        'errors' => [
+          'login' => ['IDかパスワードが間違っています']
+        ]
+      ], 422);
+    }
+
+    $token = $user->createToken('sanctum_token')->plainTextToken;
+    Log::debug(['token' => $token, 'user' => $user]);
+    return response()->json(['token' => $token, 'user' => $user], 200);
   }
 
-  public function logout(Request $request)
+  public function logout(Request $request): JsonResponse
   {
     // 現在のアクセストークンを削除して特定のセッションをログアウト
     $request->user()->currentAccessToken()->delete();
@@ -218,7 +214,7 @@ class AuthController extends Controller
     return response()->json(['message' => 'ログアウトしました。'], 200);
   }
 
-  public function update(string $id, Request $request)
+  public function update(string $id, Request $request): JsonResponse
   {
     Log::debug("Auth-update");
     Log::debug($request);
@@ -234,7 +230,7 @@ class AuthController extends Controller
       $user->icon_url = 'https://static.vegevery.my-raga-bhakti.com/user/icon/user_icon.png';
     }
 
-    $vegetarian_type = [
+    $vegetarianType = [
       "ヴィーガン" => 'vegan',
       "オリエンタル・ベジタリアン" => 'oriental_vegetarian',
       "オボ・ベジタリアン" => 'ovo_vegetarian',
@@ -246,7 +242,7 @@ class AuthController extends Controller
     ];
 
     $user->name = $request->name;
-    $user->vegetarian_type = $vegetarian_type[$request->vegetarian_type];
+    $user->vegetarian_type = $vegetarianType[$request->vegetarian_type];
     $user->introduction = $request->introduction;
 
     $user->save();
@@ -254,7 +250,7 @@ class AuthController extends Controller
     return response()->json($user);
   }
 
-  public function redirect(OAuthProviderEnum $provider)
+  public function redirect(OAuthProviderEnum $provider): string
   {
     return Socialite::driver($provider->value)->redirect()->getTargetUrl();
   }
@@ -274,16 +270,14 @@ class AuthController extends Controller
       ['provider', '=', $provider],
     ])->first();
 
-    $response = "";
+    $response = [
+      "message" => "noRegistered",
+      "socialUser" => $providerUser,
+    ];
     if ($registeredSocialAccount) {
       $response = [
         "message" => "registered",
         "socialAccountId" => $registeredSocialAccount->provider_id
-      ];
-    } else {
-      $response = [
-        "message" => "noRegistered",
-        "socialUser" => $providerUser,
       ];
     }
     return response()->json($response);
@@ -319,15 +313,14 @@ class AuthController extends Controller
 
     $user = User::where("account_id", $request->id)->first();
 
+    $response = [
+      "message" => "failed"
+    ];
     if ($user) {
       $response = [
         "id" => $user->id,
         "question" => $user->secret_question,
         "answer" => $user->answer_to_secret_question,
-      ];
-    } else {
-      $response = [
-        "message" => "failed"
       ];
     }
 
@@ -347,12 +340,12 @@ class AuthController extends Controller
       Storage::delete($user->icon_storage_path);
     }
 
-    $ArticlesOfRecipe = ArticleOfRecipe::where("user_id", $id)->get();
+    $articlesOfRecipe = ArticleOfRecipe::where("user_id", $id)->get();
 
-    foreach ($ArticlesOfRecipe as $ArticleOfRecipe) {
-      Storage::delete($ArticleOfRecipe->thumbnail_path);
+    foreach ($articlesOfRecipe as $articleOfRecipe) {
+      Storage::delete($articleOfRecipe->thumbnail_path);
 
-      $steps = RecipeStep::where("article_of_recipe_id", $ArticleOfRecipe->id)->get();
+      $steps = RecipeStep::where("article_of_recipe_id", $articleOfRecipe->id)->get();
       foreach ($steps as $step) {
         Storage::delete($step->image_path);
       }

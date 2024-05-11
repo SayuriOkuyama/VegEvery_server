@@ -35,19 +35,18 @@ class LikeController extends Controller
       ];
       Log::debug($response);
       return response()->json($response);
-    } else {
-      Like::find($request->id)->delete();
-
-      $article = ArticleOfRecipe::find($request->likeable_id);
-      $article->number_of_likes--;
-      $article->save();
-
-      $response = [
-        "like" => false,
-        "number_of_likes" => $article->number_of_likes
-      ];
-
-      return response()->json($response);
     }
+    Like::find($request->id)->delete();
+
+    $article = ArticleOfRecipe::find($request->likeable_id);
+    $article->number_of_likes--;
+    $article->save();
+
+    $response = [
+      "like" => false,
+      "number_of_likes" => $article->number_of_likes
+    ];
+
+    return response()->json($response);
   }
 }

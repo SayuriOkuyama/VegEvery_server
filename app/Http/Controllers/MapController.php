@@ -55,7 +55,7 @@ class MapController extends Controller
 
     $restaurantIds = [];
     $vegeTags = [];
-    if ($restaurants) {
+    if (count($restaurants) > 0) {
       foreach ($restaurants as $restaurant) {
         $restaurantIds[] = $restaurant->place_id;
         $vegeTags[$restaurant->place_id] = [
@@ -146,11 +146,13 @@ class MapController extends Controller
       Log::debug("ステップ４完了");
 
       // 新たなベジタイプがあったらレストランのタイプも更新
-      foreach ($types as $type => $value) {
-        if ($menu["vege_type"][$type] === "true") {
-          Log::debug($restaurant[$type]);
-          $restaurant[$type] = true;
-        };
+      if ($menu) {
+        foreach ($types as $type => $value) {
+          if ($menu["vege_type"][$type] === "true") {
+            Log::debug($restaurant[$type]);
+            $restaurant[$type] = true;
+          };
+        }
       }
     }
     Log::debug("ステップ５完了");
@@ -167,14 +169,16 @@ class MapController extends Controller
     $average = number_format($average, 1);
     Log::debug("average: $average");
 
-    $restaurant->star = $average;
+    $restaurant->star = floatval($average);
 
     // タイプも更新
-    foreach ($types as $type => $value) {
-      if ($menu["vege_type"][$type] === "true") {
-        Log::debug($restaurant[$type]);
-        $restaurant[$type] = true;
-      };
+    if (isset($menu)) {
+      foreach ($types as $type => $value) {
+        if ($menu["vege_type"][$type] === "true") {
+          Log::debug($restaurant[$type]);
+          $restaurant[$type] = true;
+        };
+      }
     }
 
     $restaurant->save();
@@ -197,17 +201,17 @@ class MapController extends Controller
 
     Menu::where("review_id", $id)->delete();
 
-    $restaurant_id = $review->restaurant_id;
+    $restaurantId = $review->restaurant_id;
     $review->delete();
 
     Log::debug("ステップ１完了");
 
-    $reviews = Review::where("restaurant_id", $restaurant_id)->get();
-    $restaurant = Restaurant::find($restaurant_id);
+    $reviews = Review::where("restaurant_id", $restaurantId)->get();
+    $restaurant = Restaurant::find($restaurantId);
 
     Log::debug("ステップ２完了");
 
-    if (!$reviews) {
+    if ($reviews->isEmpty()) {
       $restaurant->delete();
 
       Log::debug("ステップ２完了(レストラン削除)");
@@ -238,8 +242,8 @@ class MapController extends Controller
 
       // true が１個もなかったら false に更新
       foreach ($types as $type) {
-        $result = Menu::whereHas('review', function ($query) use ($restaurant_id) {
-          $query->where('restaurant_id', $restaurant_id);
+        $result = Menu::whereHas('review', function ($query) use ($restaurantId) {
+          $query->where('restaurant_id', $restaurantId);
         })->where($type, true)->first();
 
         if (!$result) {

@@ -40,5 +40,6 @@ jobs:
             php artisan migrate &&
             php artisan app:import-csv &&
             php artisan test &&
-            composer phpcs
+            composer phpcs &&
+            composer phpstan
           "

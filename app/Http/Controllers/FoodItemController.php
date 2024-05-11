@@ -28,10 +28,9 @@ class FoodItemController extends Controller
     if ($page === 'top') {
       $articles = ArticleOfItem::with('user')->orderBy('number_of_likes', 'desc')->take(6)->get();
       return response()->json($articles, 200);
-    } else {
-      $articles = ArticleOfItem::with('user')->orderBy('number_of_likes', 'desc')->paginate(20);
-      return response()->json($articles, 200);
     }
+    $articles = ArticleOfItem::with('user')->orderBy('number_of_likes', 'desc')->paginate(20);
+    return response()->json($articles, 200);
   }
 
   /**
@@ -48,34 +47,33 @@ class FoodItemController extends Controller
     Log::debug($vegeTag);
 
     if (!$keyword || ($keyword == "null")) {
-      if ($vegeTag !== "null" || !$vegeTag) {
+      if ($vegeTag !== "null") {
         $articles = ArticleOfItem::with('user')->where([$vegeTag => true])->orderBy('updated_at', 'desc')->paginate(20);
         return response()->json($articles, 200);
-      } else {
-        $articles = ArticleOfItem::with('user')->where(["vegan" => true])->orderBy('updated_at', 'desc')->paginate(20);
-        return response()->json($articles, 200);
       }
-    } else {
-      $searchedArticles = ArticleOfItem::orWhereRaw("title &@~ ?", [$keyword])->get();
-      $searchedItems = Item::orWhereRaw("name &@~ ?", [$keyword])->get();
-      $searchedReports = Report::orWhereRaw("text &@~ ?", [$keyword])->get();
-      $searchedTags = Tag::orWhereRaw("name &@~ ?", [$keyword])->with("articlesOfItem")->get();
-
-      $articleIds = $searchedArticles->pluck('id')->toArray();
-      $articleIdsFromItems = $searchedItems->pluck('article_id')->toArray();
-      $articleIdsFromReports = $searchedReports->pluck('article_id')->toArray();
-      $articleIdsFromTags = $searchedTags->pluck('id')->toArray();
-
-      $uniqueIds = array_unique(array_merge(
-        $articleIds,
-        $articleIdsFromItems,
-        $articleIdsFromReports,
-        $articleIdsFromTags
-      ));
-      $uniqueSearchedArticles = ArticleOfItem::with('user')->whereIn('id', $uniqueIds)
-        ->where([$vegeTag => true])->orderBy('updated_at', 'desc')->paginate(20);
-      return response()->json($uniqueSearchedArticles, 200);
+      $articles = ArticleOfItem::with('user')->where(["vegan" => true])->orderBy('updated_at', 'desc')->paginate(20);
+      return response()->json($articles, 200);
     }
+
+    $searchedArticles = ArticleOfItem::orWhereRaw("title &@~ ?", [$keyword])->get();
+    $searchedItems = Item::orWhereRaw("name &@~ ?", [$keyword])->get();
+    $searchedReports = Report::orWhereRaw("text &@~ ?", [$keyword])->get();
+    $searchedTags = Tag::orWhereRaw("name &@~ ?", [$keyword])->with("articlesOfItem")->get();
+
+    $articleIds = $searchedArticles->pluck('id')->toArray();
+    $articleIdsFromItems = $searchedItems->pluck('article_id')->toArray();
+    $articleIdsFromReports = $searchedReports->pluck('article_id')->toArray();
+    $articleIdsFromTags = $searchedTags->pluck('id')->toArray();
+
+    $uniqueIds = array_unique(array_merge(
+      $articleIds,
+      $articleIdsFromItems,
+      $articleIdsFromReports,
+      $articleIdsFromTags
+    ));
+    $uniqueSearchedArticles = ArticleOfItem::with('user')->whereIn('id', $uniqueIds)
+      ->where([$vegeTag => true])->orderBy('updated_at', 'desc')->paginate(20);
+    return response()->json($uniqueSearchedArticles, 200);
   }
 
   /**
@@ -233,17 +231,20 @@ class FoodItemController extends Controller
     Log::debug($request);
     $article = ArticleOfItem::with('user', "items")->where('id', $id)->first();
 
-    $path = "";
-    $url = "";
+    $path = !$request->thumbnail_path ?
+      Storage::putFile('items/thumbnail', $request->file('thumbnail_newFile')) :
+      $request->thumbnail_path;
+    $url = !$request->thumbnail_path ?
+      "https://static.vegevery.my-raga-bhakti.com/" . $path :
+      $request->thumbnail_url;
 
-    if (!$request->thumbnail_path) {
-      $path = Storage::putFile('items/thumbnail', $request->file('thumbnail_newFile'));
-      $url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
-    } else {
-      $path = $request->thumbnail_path;
-      $url = $request->thumbnail_url;
-    }
-
+    // if (!$request->thumbnail_path) {
+    //   $path = Storage::putFile('items/thumbnail', $request->file('thumbnail_newFile'));
+    //   $url = "https://static.vegevery.my-raga-bhakti.com/" . $path;
+    // } else {
+    //   $path = $request->thumbnail_path;
+    //   $url = $request->thumbnail_url;
+    // }
 
     $article->title = $request->title;
     $article->thumbnail_path = $path;
