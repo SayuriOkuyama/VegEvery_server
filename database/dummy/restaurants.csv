@@ -1,3 +1,3 @@
 name,place_id,latitude,longitude,star,vegan,oriental_vegetarian,ovo_vegetarian,pescatarian,lacto_vegetarian,pollo_vegetarian,fruitarian,other_vegetarian,created_at,updated_at
-みのりカフェ Minori Cafe エスパル仙台店,ChIJ8fr29xgoil8Rk8tRN_FOm3Q,38.2595221,140.8821783,3.0,true,true,true,true,true,true,false,false,2024-05-02 00:34:45,2024-05-02 00:34:46
-スターバックスコーヒー エスパル仙台東館店,ChIJv7vn-xgoil8Rm89HLOIVbfU,38.25953579999999,140.8833904,3.0,true,true,true,true,true,true,false,false,2024-05-02 00:34:45,2024-05-02 00:34:46
+みのりカフェ Minori Cafe エスパル仙台店,ChIJ8fr29xgoil8Rk8tRN_FOm3Q,38.2595221,140.8821783,0,true,true,true,true,true,true,false,false,2024-05-02 00:34:45,2024-05-02 00:34:46
+スターバックスコーヒー エスパル仙台東館店,ChIJv7vn-xgoil8Rm89HLOIVbfU,38.25953579999999,140.8833904,0,true,true,true,true,true,true,false,false,2024-05-02 00:34:45,2024-05-02 00:34:46

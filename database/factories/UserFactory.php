@@ -23,7 +23,7 @@ class UserFactory extends Factory
    */
   public function definition(): array
   {
-    $icon_storage_path = fake()->randomElement(
+    $iconStoragePath = fake()->randomElement(
       [
         "recipes/user_icon/IMG_3223.PNG",
         "recipes/user_icon/outside.jpeg",
@@ -32,7 +32,7 @@ class UserFactory extends Factory
       ]
     );
 
-    $icon_url = "https://static.vegevery.my-raga-bhakti.com/" . $icon_storage_path;
+    $iconUrl = "https://static.vegevery.my-raga-bhakti.com/" . $iconStoragePath;
 
     $faker = \Faker\Factory::create();
 
@@ -55,8 +55,8 @@ class UserFactory extends Factory
         'fruitarian',
         'other_vegetarian'
       ]),
-      'icon_url' => $icon_url,
-      "icon_storage_path" => $icon_storage_path
+      'icon_url' => $iconUrl,
+      "icon_storage_path" => $iconStoragePath
     ];
   }
 

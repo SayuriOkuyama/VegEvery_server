@@ -19,8 +19,8 @@ class CommentToRecipeFactory extends Factory
   public function definition(): array
   {
     return [
-      'number_of_likes' => fake()->numberBetween($min = 0, $max = 500),
-      'text' => fake()->realText($maxNbChars = 100),
+      'number_of_likes' => fake()->numberBetween(0, 500),
+      'text' => fake()->realText(100),
       'article_of_recipe_id' => ArticleOfRecipe::factory(),
       'user_id' => User::factory()
     ];

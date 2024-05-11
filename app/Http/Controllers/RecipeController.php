@@ -11,20 +11,20 @@ use App\Models\Material;
 use App\Models\RecipeStep;
 use App\Models\Tag;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Mockery\Undefined;
 
 class RecipeController extends Controller
 {
   /**
    * 人気順 にレシピ記事を返す
    */
-  public function index(Request $request)
+  public function index(Request $request): JsonResponse
   {
-    $page = $request->page;
+    $request->page ? $page = $request->page : "";
     if ($page === 'top') {
       $articles = ArticleOfRecipe::with('user')->orderBy('number_of_likes', 'desc')->take(6)->get();
       return response()->json($articles, 200);
@@ -37,10 +37,10 @@ class RecipeController extends Controller
   /**
    * ワード検索
    */
-  public function search(Request $request)
+  public function search(Request $request): JsonResponse
   {
-    $keyword = $request->search;
-    $vegeTag = $request->type;
+    $request->search ? $keyword = $request->search : "";
+    $request->type ? $vegeTag = $request->type : "";
     Log::debug($request);
     Log::debug($keyword);
     Log::debug($vegeTag);
@@ -81,7 +81,7 @@ class RecipeController extends Controller
   /**
    * 個別記事情報取得
    */
-  public function get(string $id)
+  public function get(string $id): JsonResponse
   {
     $article = ArticleOfRecipe::with(
       'user',
@@ -118,7 +118,7 @@ class RecipeController extends Controller
   /**
    * 新規投稿保存
    */
-  public function store(Request $request)
+  public function store(Request $request): JsonResponse
   {
     Log::debug($request);
 
@@ -186,7 +186,6 @@ class RecipeController extends Controller
     foreach ($request->tags as $tag) {
       Log::debug($tag["name"]);
       if ($tag["name"] !== "") {
-
         $tag_data = Tag::firstOrCreate(['name' => $tag["name"]]);
         $tagsData[] = $tag_data;
 
@@ -211,7 +210,7 @@ class RecipeController extends Controller
   /**
    * コメント投稿
    */
-  public function commentStore(Request $request, string $id)
+  public function commentStore(Request $request, string $id): JsonResponse
   {
     Log::debug($request);
     Log::debug($id);
@@ -239,7 +238,7 @@ class RecipeController extends Controller
   /**
    * 記事更新
    */
-  public function update(Request $request, string $id)
+  public function update(Request $request, string $id): JsonResponse
   {
     Log::debug('recipe-update');
     Log::debug($request);
@@ -307,7 +306,6 @@ class RecipeController extends Controller
     }
     Log::debug("第２ステップ完了");
 
-
     $oldSteps = RecipeStep::where('article_of_recipe_id', $article->id)->get();
     $newSteps = $request->steps;
     $stepsData = [];
@@ -358,11 +356,11 @@ class RecipeController extends Controller
 
     $tagsData = [];
     $articleTagsData = [];
-    $article_tags = ArticleOfRecipeTag::where(['article_of_recipe_id' => $article->id])->get();
+    $articleTags = ArticleOfRecipeTag::where(['article_of_recipe_id' => $article->id])->get();
 
-    if ($article_tags != null) {
-      foreach ($article_tags as $article_tag) {
-        $article_tag->delete();
+    if ($articleTags != null) {
+      foreach ($articleTags as $articleTag) {
+        $articleTag->delete();
       }
     }
 
@@ -397,7 +395,7 @@ class RecipeController extends Controller
   /**
    * 投稿削除
    */
-  public function delete(string $id)
+  public function delete(string $id): JsonResponse
   {
     Log::debug($id);
     RecipeStep::where("article_of_recipe_id", $id)->delete();
@@ -420,7 +418,7 @@ class RecipeController extends Controller
   /**
    * コメント削除
    */
-  public function commentDelete(Request $request)
+  public function commentDelete(Request $request): JsonResponse
   {
     Log::debug($request);
     CommentToRecipe::find($request->id)->delete();

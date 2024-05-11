@@ -22,31 +22,31 @@ class LikeFactory extends Factory
    */
   public function definition(): array
   {
-    $likeable_type = $this->faker->randomElement([
+    $likeableType = $this->faker->randomElement([
       'ArticleOfRecipe',
       'ArticleOfItem',
       'Review',
       'CommentToRecipe',
       'CommentToItem'
     ]);
-    $likeable_id = null;
+    $likeableId = null;
 
-    if ($likeable_type === "ArticleOfRecipe") {
-      $likeable_id = ArticleOfRecipe::factory();
-    } elseif ($likeable_type === "ArticleOfItem") {
-      $likeable_id = ArticleOfItem::factory();
-    } elseif ($likeable_type === "Review") {
-      $likeable_id = Review::factory();
-    } elseif ($likeable_type === "CommentToRecipe") {
-      $likeable_id = CommentToRecipe::factory();
-    } elseif ($likeable_type === "CommentToItem") {
-      $likeable_id = CommentToItem::factory();
+    if ($likeableType === "ArticleOfRecipe") {
+      $likeableId = ArticleOfRecipe::factory();
+    } elseif ($likeableType === "ArticleOfItem") {
+      $likeableId = ArticleOfItem::factory();
+    } elseif ($likeableType === "Review") {
+      $likeableId = Review::factory();
+    } elseif ($likeableType === "CommentToRecipe") {
+      $likeableId = CommentToRecipe::factory();
+    } elseif ($likeableType === "CommentToItem") {
+      $likeableId = CommentToItem::factory();
     }
 
     return [
       'user_id' => User::factory(),
-      'likeable_id' => $likeable_id,
-      'likeable_type' => $likeable_type
+      'likeable_id' => $likeableId,
+      'likeable_type' => $likeableType
     ];
   }
 }

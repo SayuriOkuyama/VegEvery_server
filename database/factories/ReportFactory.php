@@ -17,19 +17,19 @@ class ReportFactory extends Factory
    */
   public function definition(): array
   {
-    $image_path = fake()->randomElement([
+    $imagePath = fake()->randomElement([
       "items/report_images/brooke-lark-kXQ3J7_2fpc-unsplash.jpg",
       "items/report_images/haseeb-jamil-J9lD6FS6_cs-unsplash.jpg",
       "items/report_images/victoria-shes-4MEL9XS-3JQ-unsplash.jpg"
     ]);
 
-    $image_url = "https://static.vegevery.my-raga-bhakti.com/" . $image_path;
+    $imageUrl = "https://static.vegevery.my-raga-bhakti.com/" . $imagePath;
 
     return [
       'order' => fake()->unique()->randomNumber(3),
-      'image_path' => $image_path,
-      'image_url' => $image_url,
-      'text' => fake()->realText($maxNbChars = 100),
+      'image_path' => $imagePath,
+      'image_url' => $imageUrl,
+      'text' => fake()->realText(100),
       'article_of_item_id' => ArticleOfItem::factory()
     ];
   }

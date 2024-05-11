@@ -1,4 +1,4 @@
 account_id,name,password,secret_question,answer_to_secret_question,vegetarian_type,icon_url,icon_storage_path,created_at,updated_at
-A3Bc9G6H2jK8Lp5,初心者ベジー,password123,好きな色は？,青,vegan,https://static.vegevery.my-raga-bhakti.com/recipes/thumbnail/yoggy.jpeg,/recipes/thumbnail/yoggy.jpeg,2024-04-29 10:00:00,2024-04-29 10:30:00
-Z6YxW2V5U8TsR1Q,ベジ三昧,secretword,初めて飼ったペットの名前は？,フラッフィー,lacto_vegetarian,https://static.vegevery.my-raga-bhakti.com/recipes/thumbnail/cooking_man.jpeg,/recipes/thumbnail/cooking_man.jpeg,2024-04-29 11:00:00,2024-04-29 11:15:00
-M4N7BvC0X9Z5L2K,シェフねこ,veggie123,母の旧姓は？,ジョンソン,ovo_vegetarian,https://static.vegevery.my-raga-bhakti.com/recipes/thumbnail/nekosheff.jpeg,/recipes/thumbnail/nekosheff.jpeg,2024-04-29 12:00:00,2024-04-29 12:30:00
+A3Bc9G6H2jK8Lp5,初心者ベジー,password123,好きな色は？,青,vegan,https://static.vegevery.my-raga-bhakti.com/user/icon/yoggy.jpeg,user/icon/yoggy.jpeg,2024-04-29 10:00:00,2024-04-29 10:30:00
+Z6YxW2V5U8TsR1Q,ベジ三昧,secretword,初めて飼ったペットの名前は？,フラッフィー,lacto_vegetarian,https://static.vegevery.my-raga-bhakti.com/user/icon/cooking_man.jpeg,user/icon/cooking_man.jpeg,2024-04-29 11:00:00,2024-04-29 11:15:00
+M4N7BvC0X9Z5L2K,シェフねこ,veggie123,母の旧姓は？,ジョンソン,ovo_vegetarian,https://static.vegevery.my-raga-bhakti.com/user/icon/nekosheff.jpeg,user/icon/nekosheff.jpeg,2024-04-29 12:00:00,2024-04-29 12:30:00

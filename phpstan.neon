@@ -1,3 +1,5 @@
+includes:
+    - ./vendor/nunomaduro/larastan/extension.neon
 parameters:
   level: 6
   paths:
@@ -8,3 +10,4 @@ parameters:
     - node_modules
     - storage
     - migrations
+  checkGenericClassInNonGenericObjectType: false

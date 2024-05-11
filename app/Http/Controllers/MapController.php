@@ -6,6 +6,7 @@ use App\Models\Menu;
 use App\Models\Restaurant;
 use App\Models\Review;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\Storage;
 
 class MapController extends Controller
 {
-  public function get(string $id)
+  public function get(string $id): JsonResponse
   {
     $restaurant = Restaurant::where('place_id', $id)->first();
     $reviews = Review::where("restaurant_id", $restaurant->id)->get();
@@ -45,7 +46,7 @@ class MapController extends Controller
     return response()->json($response);
   }
 
-  public function search(Request $request)
+  public function search(Request $request): JsonResponse
   {
     Log::debug($request);
 
@@ -79,7 +80,7 @@ class MapController extends Controller
     return response()->json($response);
   }
 
-  public function store(Request $request)
+  public function store(Request $request): JsonResponse
   {
     Log::debug($request);
 
@@ -190,7 +191,7 @@ class MapController extends Controller
     return response()->json($response);
   }
 
-  public function delete(string $id)
+  public function delete(string $id): JsonResponse
   {
     $review = Review::find($id);
 

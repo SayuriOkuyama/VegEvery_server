@@ -19,7 +19,7 @@ class MenuFactory extends Factory
   {
     return [
       'name' => fake()->realText(10),
-      'price' => fake()->numberBetween($min = 100, $max = 5000),
+      'price' => fake()->numberBetween(100, 5000),
       'review_id' => Review::factory(),
       'vegan' => fake()->randomElement([true, false]),
       'oriental_vegetarian' => fake()->randomElement([true, false]),
