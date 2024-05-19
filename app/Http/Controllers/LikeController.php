@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ArticleOfItem;
 use App\Models\ArticleOfRecipe;
 use App\Models\Like;
 use Illuminate\Http\JsonResponse;
@@ -22,9 +23,13 @@ class LikeController extends Controller
         "likeable_id" => $request->likeable_id,
       ]);
 
-      $article = ArticleOfRecipe::find($request->likeable_id);
+      $request->likeable_type === "ArticleOfRecipe"
+        ? $article = ArticleOfRecipe::find($request->likeable_id)
+        : $article = ArticleOfItem::find($request->likeable_id);
+      Log::debug($article);
       $article->number_of_likes++;
       $article->save();
+      Log::debug($article);
 
       $response = [
         "user_id" => $newLikeData->user_id,
@@ -36,9 +41,13 @@ class LikeController extends Controller
       Log::debug($response);
       return response()->json($response);
     }
+
     Like::find($request->id)->delete();
 
-    $article = ArticleOfRecipe::find($request->likeable_id);
+    $request->likeable_type === "ArticleOfRecipe"
+      ? $article = ArticleOfRecipe::find($request->likeable_id)
+      : $article = ArticleOfItem::find($request->likeable_id);
+
     $article->number_of_likes--;
     $article->save();
 
