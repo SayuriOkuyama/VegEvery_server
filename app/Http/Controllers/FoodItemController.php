@@ -213,6 +213,7 @@ class FoodItemController extends Controller
 
     $commentWithUserName = [
       "id" => $commentData->id,
+      "user_id" => $request->user_id,
       "userName" => $user->name,
       "userIcon" => $user->icon_url,
       "text" => $commentData->text,
@@ -382,6 +383,6 @@ class FoodItemController extends Controller
   {
     Log::debug($request);
     CommentToItem::find($request->id)->delete();
-    return response()->json("削除しました");
+    return response()->json($request->id, 200);
   }
 }
